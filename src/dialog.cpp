@@ -31,7 +31,7 @@
 #include <QtGlobal>
 
 #include "imagelistdelegate.h"
-#include "pdfcreator.h"
+#include "executor.h"
 
 
 
@@ -99,8 +99,8 @@ void Dialog::slotButtonClicked(QAbstractButton *button)
 
         const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
         if (!saveFile.isEmpty()) {
-            PdfCreator *creator = new PdfCreator;
-            connect(creator, &PdfCreator::finished, this, &Dialog::pdfCreatorFinished);
+            Executor *creator = new Executor;
+            connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
             creator->setOutputFile(saveFile);
             QApplication::setOverrideCursor(Qt::WaitCursor);
             creator->buildPdf(files);
@@ -119,7 +119,7 @@ void Dialog::pdfCreatorFinished(bool success)
 
     // get the result file name from the creator object.
     QString resultFile;
-    PdfCreator *creator = static_cast<PdfCreator*>(sender());
+    Executor *creator = static_cast<Executor*>(sender());
     if (creator) {
         resultFile = creator->outputFile();
         creator->deleteLater();
@@ -167,8 +167,40 @@ void Dialog::updateInfoText(const QString& saveFile)
 
 void Dialog::slotFromScanner()
 {
+    QString scanCmd;
+    const QString defltCmd{ "scanimage --mode 'Grey' --resolution 150 -l 0 -t 0 -x 210 -y 297 --format png"};
+
+    scanCmd = _settings->value(_SettingsScanBW, defltCmd ).toString();
+
+    Executor *scanner = new Executor;
+    scanner->setCommand(scanCmd);
+
+    connect(scanner, &Executor::finished, this, &Dialog::slotScanFinished);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    if (!scanner->scan(false))
+        slotScanFinished(false);
 
 }
+
+void Dialog::slotScanFinished(bool success)
+{
+
+    // get the result file name from the creator object.
+    QString resultFile;
+    Executor *creator = static_cast<Executor*>(sender());
+    if (creator) {
+        resultFile = creator->outputFile();
+        creator->deleteLater();
+    }
+    if (success) {
+        _model.addImageFile(resultFile);
+    }
+
+    QApplication::restoreOverrideCursor();
+    updateInfoText(resultFile);
+}
+
 
 Dialog::~Dialog()
 {

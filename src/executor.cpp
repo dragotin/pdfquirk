@@ -15,29 +15,36 @@
   along with pdfquirk.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "pdfcreator.h"
+#include "executor.h"
 
 #include <QObject>
 #include <QProcess>
+#include <QTemporaryDir>
+#include <QDebug>
 
-PdfCreator::PdfCreator(QObject *parent)
+Executor::Executor(QObject *parent)
     : QObject(parent),
       _outputFile {"/tmp/foo.pdf"}
 {
 
 }
 
-QString PdfCreator::outputFile()
+QString Executor::outputFile()
 {
     return _outputFile;
 }
 
-void PdfCreator::setOutputFile(const QString& fileName)
+void Executor::setOutputFile(const QString& fileName)
 {
     _outputFile = fileName;
 }
 
-void PdfCreator::buildPdf(const QStringList& files)
+void Executor::setCommand(const QString& cmd)
+{
+    _cmd = cmd;
+}
+
+void Executor::buildPdf(const QStringList& files)
 {
     if (!files.isEmpty() && !_outputFile.isEmpty()) {
         QStringList args;
@@ -49,14 +56,38 @@ void PdfCreator::buildPdf(const QStringList& files)
 
         QProcess *process = new QProcess;
         connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                this, &PdfCreator::slotFinished);
+                this, &Executor::slotFinished);
         process->start("convert", args);
     } else {
         slotFinished(-3, QProcess::ExitStatus::NormalExit);
     }
 }
 
-void PdfCreator::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
+bool Executor::scan(bool colorMode)
+{
+    QTemporaryDir dir;
+    dir.setAutoRemove(false);
+
+    _outputFile = dir.filePath("scan.png");
+    QProcess *process = new QProcess;
+
+    QString cmd = _cmd;
+
+    cmd.append(" -o ");
+    cmd.append(_outputFile);
+
+    qDebug() << "Starting" << cmd;
+
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, &Executor::slotFinished);
+
+    process->start(cmd);
+
+    return true;
+}
+
+
+void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     emit finished(exitCode >= 0); // FIXME
 

@@ -56,6 +56,7 @@ private slots:
     void slotFromScanner();
     void slotButtonClicked(QAbstractButton *button);
     void pdfCreatorFinished(bool success);
+    void slotScanFinished(bool success);
 
 private:
     void updateInfoText(const QString& saveFile = QString());
@@ -63,6 +64,7 @@ private:
     Ui::Dialog *ui;
 
     const QString _SettingsLastFilePath {"lastFilePath"};
+    const QString _SettingsScanBW{"scanCmdMonochrome"};
 
     ImageModel _model;
     QString _lastPath;

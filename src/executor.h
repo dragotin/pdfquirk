@@ -21,16 +21,19 @@
 #include <QObject>
 #include <QProcess>
 
-class PdfCreator : public QObject
+class Executor : public QObject
 {
     Q_OBJECT
 public:
-    explicit PdfCreator(QObject *parent = nullptr);
+    explicit Executor(QObject *parent = nullptr);
 
     void buildPdf(const QStringList& files);
+    bool scan(bool colorMode);
 
     void setOutputFile(const QString& fileName);
     QString outputFile();
+
+    void setCommand(const QString& cmd);
 
 signals:
     void finished(bool);
@@ -41,6 +44,7 @@ private slots:
 
 private:
     QString _outputFile;
+    QString _cmd;
 };
 
 #endif // PDFCREATOR_H

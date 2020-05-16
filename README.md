@@ -2,7 +2,7 @@
 
 **Creating PDFs from images or scanner made easy.**
 
-![pdfquirk screenshot](/resources/screenshot1.png?raw=true "Screenshot")
+![pdfquirk screenshot](/resources/screenshot1.png?raw=true&s=200 "Screenshot")
 
 pdfquirk is a little utility to create PDFs out of images on the 
 harddisk or from the scanner.

@@ -42,6 +42,8 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 {
     if (option.state & QStyle::State_Selected)
         painter->fillRect(option.rect, option.palette.highlight());
+    else
+        painter->fillRect(option.rect, option.palette.alternateBase());
 
     painter->save();
 
@@ -52,20 +54,24 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     else
         painter->setBrush(QBrush(Qt::black));
 
-    int boxH = 28;
+    const QString pageStr = index.data().toString();
+    int textH = option.fontMetrics.boundingRect(pageStr).height();
+    int imgH = option.rect.height() - textH - 3;           // one pix above and below and one at bottom
+    int desiredW = qRound( imgH / 1.41) -4;                // 2 pix margin each side.
+    int imgWMargin = (option.rect.width() - desiredW) / 2; // same margin left and right
+    int imgW = option.rect.width() - 2*imgWMargin;
 
-    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(_size.width()-4, _size.height() -4 -boxH);
-    painter->drawPixmap( option.rect.topLeft().x()+2, 2, pix);
+    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(imgW, imgH);
+    painter->drawPixmap(option.rect.topLeft().x()+imgWMargin, 1, pix);
 
     // a little background behinde the "Page n" text
-    int h = _size.height()-boxH;
-
-    QRect r ( option.rect.topLeft().x()+2, 3+h, _size.width()-4, 17);
+    QRect r (option.rect.topLeft().x()+2, 2+imgH, option.rect.width()-4, textH);
     QColor color(0xC3C3C3);
     painter->fillRect(r, color);
 
     // ..and the page number
-    painter->drawText(r, Qt::AlignHCenter, index.data().toString());
+    painter->drawText(r, Qt::AlignHCenter, pageStr );
+
     painter->restore();
 }
 

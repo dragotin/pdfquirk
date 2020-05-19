@@ -61,7 +61,7 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     int imgWMargin = (option.rect.width() - desiredW) / 2; // same margin left and right
     int imgW = option.rect.width() - 2*imgWMargin;
 
-    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(imgW, imgH);
+    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(imgW, imgH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     painter->drawPixmap(option.rect.topLeft().x()+imgWMargin, 1, pix);
 
     // a little background behinde the "Page n" text

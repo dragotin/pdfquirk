@@ -150,6 +150,8 @@ void Dialog::slotFromFile()
     QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
 
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files to PDF"), path, "Images (*.png *.jpeg *.jpg)");
+
+    startLengthyOperation();
     for (const QString& file : files) {
         QFileInfo fi(file);
         qApp->processEvents();
@@ -157,6 +159,7 @@ void Dialog::slotFromFile()
 
         path = fi.path();
     }
+    endLengthyOperation();
     updateInfoText();
     _settings->setValue(_SettingsLastFilePath, path);
     _settings->sync();
@@ -191,8 +194,7 @@ void Dialog::slotFromScanner()
     scanner->setCommand(scanCmd);
 
     connect(scanner, &Executor::finished, this, &Dialog::slotScanFinished);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
+    startLengthyOperation();
     if (!scanner->scan(false))
         slotScanFinished(false);
 
@@ -211,11 +213,24 @@ void Dialog::slotScanFinished(bool success)
     if (success) {
         _model.addImageFile(resultFile);
     }
+    endLengthyOperation();
 
-    QApplication::restoreOverrideCursor();
     updateInfoText(resultFile);
 }
 
+void Dialog::startLengthyOperation()
+{
+    if (_lengthyOpRunning) return;
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    _lengthyOpRunning = true;
+}
+
+void Dialog::endLengthyOperation()
+{
+    if (!_lengthyOpRunning) return;
+    QApplication::restoreOverrideCursor();
+    _lengthyOpRunning = true;
+}
 
 Dialog::~Dialog()
 {

@@ -61,6 +61,9 @@ private slots:
     void slotScanFinished(bool success);
     void slotListViewSize(QSize s);
 
+    void startLengthyOperation();
+    void endLengthyOperation();
+
 private:
     void updateInfoText(const QString& saveFile = QString());
 
@@ -73,5 +76,6 @@ private:
     QString _lastPath;
     QScopedPointer<QSettings> _settings;
     ImageListDelegate *_delegate;
+    bool _lengthyOpRunning { false };
 };
 #endif // DIALOG_H

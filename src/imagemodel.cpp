@@ -47,7 +47,7 @@ void ImageModel::addImageFile( const QString& file )
          //emit a signal to make the view reread identified data
     emit dataChanged(fromIdx, toIdx, {Qt::DisplayRole});
 
-    _pixmaps.append(pix.scaled(ImageSize()));
+    _pixmaps.append(pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     _pathes.append(file);
 }
 

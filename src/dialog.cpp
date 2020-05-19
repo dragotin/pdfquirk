@@ -90,7 +90,7 @@ Dialog::Dialog(QWidget *parent)
 
     connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &Dialog::slotButtonClicked);
 
-    updateInfoText();
+    updateInfoText(ProcessStatus::JustStarted);
 }
 
 void Dialog::slotListViewSize(QSize s)
@@ -118,6 +118,7 @@ void Dialog::slotButtonClicked(QAbstractButton *button)
             connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
             creator->setOutputFile(saveFile);
             QApplication::setOverrideCursor(Qt::WaitCursor);
+            updateInfoText(ProcessStatus::CreatingPdf);
             creator->buildPdf(files);
         }
     }
@@ -126,6 +127,14 @@ void Dialog::slotButtonClicked(QAbstractButton *button)
 void Dialog::accept()
 {
     // do nothing to not close the dialog.
+}
+
+void Dialog::reject()
+{
+    if (_scanner != nullptr) {
+        _scanner->stop();
+    }
+    QDialog::reject();
 }
 
 void Dialog::pdfCreatorFinished(bool success)
@@ -142,7 +151,7 @@ void Dialog::pdfCreatorFinished(bool success)
     if (success) {
         _model.clear();
     }
-    updateInfoText(resultFile);
+    updateInfoText(ProcessStatus::PDFCreated, resultFile);
 }
 
 void Dialog::slotFromFile()
@@ -160,25 +169,47 @@ void Dialog::slotFromFile()
         path = fi.path();
     }
     endLengthyOperation();
-    updateInfoText();
+    updateInfoText(ProcessStatus::ImageLoaded);
     _settings->setValue(_SettingsLastFilePath, path);
     _settings->sync();
 }
 
-void Dialog::updateInfoText(const QString& saveFile)
+void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
 {
-    QString text = tr("No images loaded. Load from scanner or file using the buttons above.");
-    if (_model.rowCount() > 0) {
-        text = tr("%1 image(s) loaded. Press Save button to create PDF.").arg(_model.rowCount());
-    }
-    bool openExt { false };
+    int numPages = _model.rowCount();
 
-    if (!saveFile.isEmpty()) {
-        text = tr("PDF file was saved to <a href=\"file:%1\">%1</a>").arg(saveFile);
-        openExt = true;
+    QString str;
+    bool openExternal {false};
+    switch(stat) {
+    case ProcessStatus::Unknown:
+        str = tr("An unknown state is happenening.");
+                break;
+    case ProcessStatus::JustStarted:
+        str =  tr("No images loaded. Load from scanner or file using the buttons above.");
+        break;
+    case ProcessStatus::ImageScanned:
+        str = tr("%1 image(s) scanned. Press Save to create the PDF.").arg(numPages);
+        break;
+    case ProcessStatus::ImageLoaded:
+        str = tr("%1 image(s) loaded. Press Save to create the PDF.").arg(numPages);
+        break;
+    case ProcessStatus::PDFCreated:
+        str = tr("PDF file was saved to <a href=\"file:%1\">%1</a>").arg(saveFile);
+        openExternal = true;
+        break;
+    case ProcessStatus::ScanFailed:
+        str = tr("The scan command hasn't succeeded, check the configuration.");
+        break;
+    case ProcessStatus::Scanning:
+        str = tr("Scanning...");
+        break;
+    case ProcessStatus::CreatingPdf:
+        str = tr("Creating the PDF...");
+        break;
     }
-    ui->labInfo->setOpenExternalLinks(openExt);
-    ui->labInfo->setText(text);
+
+    ui->labInfo->setOpenExternalLinks(openExternal);
+    ui->labInfo->setText(str);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled( _model.rowCount() > 0 );
 }
 
@@ -190,37 +221,44 @@ void Dialog::slotFromScanner()
 
     scanCmd = _settings->value(_SettingsScanBW, defltCmd ).toString();
 
-    Executor *scanner = new Executor;
-    scanner->setCommand(scanCmd);
+    _scanner = new Executor;
+    _scanner->setCommand(scanCmd);
 
-    connect(scanner, &Executor::finished, this, &Dialog::slotScanFinished);
+    connect(_scanner, &Executor::finished, this, &Dialog::slotScanFinished);
     startLengthyOperation();
-    if (!scanner->scan(false))
+    if (!_scanner->scan(false)) {
         slotScanFinished(false);
+    } else {
+        updateInfoText(ProcessStatus::Scanning);
+    }
 
 }
 
 void Dialog::slotScanFinished(bool success)
 {
-
     // get the result file name from the creator object.
     QString resultFile;
-    Executor *creator = static_cast<Executor*>(sender());
-    if (creator) {
-        resultFile = creator->outputFile();
-        creator->deleteLater();
+    if (_scanner) {
+        resultFile = _scanner->outputFile();
+        delete _scanner;
+        _scanner = nullptr;
     }
     if (success) {
         _model.addImageFile(resultFile);
     }
     endLengthyOperation();
 
-    updateInfoText(resultFile);
+    if (_model.rowCount() && success)
+        updateInfoText(ProcessStatus::ImageScanned, resultFile);
+    else
+        updateInfoText(ProcessStatus::ScanFailed);
 }
 
 void Dialog::startLengthyOperation()
 {
     if (_lengthyOpRunning) return;
+    ui->pbAddFromFile->setEnabled(false);
+    ui->pbAddFromScanner->setEnabled(false);
     QApplication::setOverrideCursor(Qt::WaitCursor);
     _lengthyOpRunning = true;
 }
@@ -228,6 +266,8 @@ void Dialog::startLengthyOperation()
 void Dialog::endLengthyOperation()
 {
     if (!_lengthyOpRunning) return;
+    ui->pbAddFromFile->setEnabled(true);
+    ui->pbAddFromScanner->setEnabled(true);
     QApplication::restoreOverrideCursor();
     _lengthyOpRunning = true;
 }

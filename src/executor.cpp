@@ -44,6 +44,12 @@ void Executor::setCommand(const QString& cmd)
     _cmd = cmd;
 }
 
+void Executor::stop()
+{
+    if (_process)
+        _process->terminate();
+}
+
 void Executor::buildPdf(const QStringList& files)
 {
     if (!files.isEmpty() && !_outputFile.isEmpty()) {
@@ -54,10 +60,10 @@ void Executor::buildPdf(const QStringList& files)
         args.append(argstr.split(' '));
         args.append(_outputFile);
 
-        QProcess *process = new QProcess;
-        connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        _process = new QProcess;
+        connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, &Executor::slotFinished);
-        process->start("convert", args);
+        _process->start("convert", args);
     } else {
         slotFinished(-3, QProcess::ExitStatus::NormalExit);
     }
@@ -91,7 +97,8 @@ void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     emit finished(exitCode >= 0); // FIXME
 
-    sender()->deleteLater();
+    delete _process;
+    _process = nullptr;
 }
 
 

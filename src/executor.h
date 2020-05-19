@@ -21,6 +21,8 @@
 #include <QObject>
 #include <QProcess>
 
+class QProcess;
+
 class Executor : public QObject
 {
     Q_OBJECT
@@ -35,6 +37,9 @@ public:
 
     void setCommand(const QString& cmd);
 
+public slots:
+    void stop();
+
 signals:
     void finished(bool);
     void error(const QString&);
@@ -45,6 +50,7 @@ private slots:
 private:
     QString _outputFile;
     QString _cmd;
+    QProcess *_process {nullptr};
 };
 
 #endif // PDFCREATOR_H

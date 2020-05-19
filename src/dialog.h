@@ -29,6 +29,7 @@ QT_END_NAMESPACE
 
 class QAbstractButton;
 class ImageListDelegate;
+class Executor;
 
 class SizeCatcher : public QObject
 {
@@ -50,8 +51,20 @@ public:
     Dialog(QWidget *parent = nullptr);
     ~Dialog();
 
+    enum class ProcessStatus {
+        Unknown,
+        JustStarted,
+        ImageScanned,
+        ImageLoaded,
+        PDFCreated,
+        ScanFailed,
+        Scanning,
+        CreatingPdf
+    };
+
 public slots:
     void accept() override;
+    void reject() override;
 
 private slots:
     void slotFromFile();
@@ -65,7 +78,7 @@ private slots:
     void endLengthyOperation();
 
 private:
-    void updateInfoText(const QString& saveFile = QString());
+    void updateInfoText(ProcessStatus stat, const QString& saveFile = QString());
 
     Ui::Dialog *ui;
 
@@ -77,5 +90,6 @@ private:
     QScopedPointer<QSettings> _settings;
     ImageListDelegate *_delegate;
     bool _lengthyOpRunning { false };
+    Executor *_scanner {nullptr};
 };
 #endif // DIALOG_H

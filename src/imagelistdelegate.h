@@ -31,7 +31,8 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &  option ,
                    const QModelIndex &  index ) const override;
 
-    void setSizeHint(int width, int height);
+public slots:
+    void slotThumbSize(const QSize& size);
 
 protected:
     void initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const override;

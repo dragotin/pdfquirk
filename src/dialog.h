@@ -28,6 +28,8 @@ namespace Ui { class Dialog; }
 QT_END_NAMESPACE
 
 class QAbstractButton;
+class ImageListDelegate;
+
 class SizeCatcher : public QObject
 {
     Q_OBJECT
@@ -57,6 +59,7 @@ private slots:
     void slotButtonClicked(QAbstractButton *button);
     void pdfCreatorFinished(bool success);
     void slotScanFinished(bool success);
+    void slotListViewSize(QSize s);
 
 private:
     void updateInfoText(const QString& saveFile = QString());
@@ -69,5 +72,6 @@ private:
     ImageModel _model;
     QString _lastPath;
     QScopedPointer<QSettings> _settings;
+    ImageListDelegate *_delegate;
 };
 #endif // DIALOG_H

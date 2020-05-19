@@ -29,7 +29,7 @@ public:
 
     QStringList files() const;
 
-    static QSize ImageSize() { return QSize(100, 141); }
+    static QSize ImageSize() { return QSize(200, 282); }
 
 public slots:
     void addImageFile( const QString& file );

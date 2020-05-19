@@ -52,11 +52,15 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     else
         painter->setBrush(QBrush(Qt::black));
 
-    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>();
+    int boxH = 28;
+
+    const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(_size.width()-4, _size.height() -4 -boxH);
     painter->drawPixmap( option.rect.topLeft().x()+2, 2, pix);
 
     // a little background behinde the "Page n" text
-    QRect r ( option.rect.topLeft().x()+2, 3 + pix.height(), _size.width()-4, _size.height() - pix.height() -3);
+    int h = _size.height()-boxH;
+
+    QRect r ( option.rect.topLeft().x()+2, 3+h, _size.width()-4, 17);
     QColor color(0xC3C3C3);
     painter->fillRect(r, color);
 
@@ -65,14 +69,15 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     painter->restore();
 }
 
-void ImageListDelegate::setSizeHint(int width, int height)
-{
-    _size = QSize(width, height);
-    qDebug() << "Received size " << _size;
-}
-
 QSize ImageListDelegate::sizeHint(const QStyleOptionViewItem &  option ,
                                   const QModelIndex &  index ) const
 {
     return _size;
+}
+
+void ImageListDelegate::slotThumbSize(const QSize& size)
+{
+    // qDebug() << "Got size" << size;
+    _size = size;
+
 }

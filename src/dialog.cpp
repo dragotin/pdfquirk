@@ -29,6 +29,7 @@
 #include <QResizeEvent>
 #include <QDebug>
 #include <QtGlobal>
+#include <QScrollBar>
 
 #include "imagelistdelegate.h"
 #include "executor.h"
@@ -64,22 +65,25 @@ Dialog::Dialog(QWidget *parent)
     ui->setupUi(this);
 
     ui->listviewThumbs->setModel(&_model);
-    ImageListDelegate *delegate = new ImageListDelegate();
-    ui->listviewThumbs->setItemDelegate(delegate);
+    _delegate = new ImageListDelegate();
+    ui->listviewThumbs->setItemDelegate(_delegate);
     ui->listviewThumbs->setSelectionMode(QAbstractItemView::NoSelection);
+    ui->listviewThumbs->setResizeMode(QListView::Adjust);
+    ui->listviewThumbs->setMaximumHeight(300);
+    ui->listviewThumbs->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
 
     QFont f = ui->listviewThumbs->font();
     QFontMetrics fm(f);
     thumbWidth += 4;
     thumbHeight += 4 + fm.height() + 2;
-    ui->listviewThumbs->setFixedHeight(thumbHeight+6);
+    // ui->listviewThumbs->setFixedHeight(thumbHeight+6);
 
-    delegate->setSizeHint(thumbWidth, thumbHeight);
+    _delegate->slotThumbSize(QSize(thumbWidth, thumbHeight));
 
     // size catcher
-    //  SizeCatcher *sizeCatcher = new SizeCatcher;
-    // connect(sizeCatcher, &SizeCatcher::thumbSize, delegate, &ImageListDelegate::slotThumbSize);
-    // ui->listviewThumbs->installEventFilter(sizeCatcher);
+    SizeCatcher *sizeCatcher = new SizeCatcher;
+    connect(sizeCatcher, &SizeCatcher::thumbSize, this, &Dialog::slotListViewSize);
+    ui->listviewThumbs->installEventFilter(sizeCatcher);
 
     connect (ui->pbAddFromFile, &QPushButton::clicked, this, &Dialog::slotFromFile);
     connect (ui->pbAddFromScanner, &QPushButton::clicked, this, &Dialog::slotFromScanner);
@@ -87,6 +91,17 @@ Dialog::Dialog(QWidget *parent)
     connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &Dialog::slotButtonClicked);
 
     updateInfoText();
+}
+
+void Dialog::slotListViewSize(QSize s)
+{
+    int spacing = ui->listviewThumbs->contentsMargins().top() + ui->listviewThumbs->contentsMargins().bottom();
+    int h = s.height();
+    if (ui->listviewThumbs->horizontalScrollBar()->isVisible()) {
+        h = s.height() - ui->listviewThumbs->horizontalScrollBar()->height();
+    }
+    s.setHeight(h - spacing);
+    _delegate->slotThumbSize(s);
 }
 
 void Dialog::slotButtonClicked(QAbstractButton *button)

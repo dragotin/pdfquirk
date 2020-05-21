@@ -16,4 +16,7 @@ add_executable(pdfquirk
 
 target_link_libraries(pdfquirk PRIVATE Qt5::Widgets)
 
+install(TARGETS pdfquirk ${INSTALL_TARGETS_DEFAULT_ARGS})
+
+
 

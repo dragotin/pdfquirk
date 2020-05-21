@@ -47,7 +47,7 @@ QString aboutText()
                "under the <a href=\"https://www.gnu.org/licenses/gpl-3.0.de.html\">"
                "Gnu General Public License version 3</a>.</p>"
                "<p>Copyright 2020 Klaas Freitag &lt;kraft@freisturz.de&gt;,&nbsp;"
-               "<a href=\"https://pdfquirk.volle-kraft-voraus.de\">https://pdfquirk.volle-kraft-voraus.de</a>.</p>"
+               "<a href=\"https://dragotin.github.io/quirksite/\">https://dragotin.github.io/quirksite/</a>.</p>"
                "Contributions are welcome, find the <a href=\"https://github.com/dragotin/pdfquirk\">sources here</a>"
                " or <a href=\"https://github.com/dragotin/pdfquirk/issues\">report bugs</a>.</p>").arg(VERSION);
 }

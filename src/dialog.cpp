@@ -30,10 +30,29 @@
 #include <QDebug>
 #include <QtGlobal>
 #include <QScrollBar>
+#include <QMenu>
 
 #include "imagelistdelegate.h"
 #include "executor.h"
+#include "version.h"
 
+namespace {
+
+QString aboutText()
+{
+    return QObject::tr( "<h2>About PDF Quirk %1</h2>"
+               "<p>PDF Quirk is a simple app to easily create PDFs from scans or images.</p>"
+               "<p></p>"
+               "<p>It is free software released "
+               "under the <a href=\"https://www.gnu.org/licenses/gpl-3.0.de.html\">"
+               "Gnu General Public License version 3</a>.</p>"
+               "<p>Copyright 2020 Klaas Freitag &lt;kraft@freisturz.de&gt;,&nbsp;"
+               "<a href=\"https://pdfquirk.volle-kraft-voraus.de\">https://pdfquirk.volle-kraft-voraus.de</a>.</p>"
+               "Contributions are welcome, find the <a href=\"https://github.com/dragotin/pdfquirk\">sources here</a>"
+               " or <a href=\"https://github.com/dragotin/pdfquirk/issues\">report bugs</a>.</p>").arg(VERSION);
+}
+
+} // end namespace
 
 
 bool SizeCatcher::eventFilter(QObject *obj, QEvent *event)
@@ -65,8 +84,8 @@ Dialog::Dialog(QWidget *parent)
     ui->setupUi(this);
 
     ui->listviewThumbs->setModel(&_model);
-    _delegate = new ImageListDelegate();
-    ui->listviewThumbs->setItemDelegate(_delegate);
+    _delegate.reset(new ImageListDelegate());
+    ui->listviewThumbs->setItemDelegate(_delegate.data());
     ui->listviewThumbs->setSelectionMode(QAbstractItemView::NoSelection);
     ui->listviewThumbs->setResizeMode(QListView::Adjust);
     ui->listviewThumbs->setMaximumHeight(300);
@@ -91,6 +110,58 @@ Dialog::Dialog(QWidget *parent)
     connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &Dialog::slotButtonClicked);
 
     updateInfoText(ProcessStatus::JustStarted);
+    buildMenu(ui->menuButton);
+
+    ui->widgetStack->setCurrentIndex(_IndxListView);
+
+    ui->labAbout->setText( aboutText() );
+}
+
+void Dialog::buildMenu(QToolButton *button)
+{
+    QMenu *menu   = new QMenu(this);
+    QAction *actConfiguration = new QAction(tr("Configuration..."), this);
+    QAction *actAbout = new QAction(tr("About PDF Quirk..."), this);
+
+    menu->addAction(actConfiguration);
+    menu->addAction(actAbout);
+    button->setMenu(menu);
+    button->setPopupMode(QToolButton::InstantPopup);
+    connect(actConfiguration, &QAction::triggered, this, &Dialog::showConfiguration);
+    connect(actAbout, &QAction::triggered, this, &Dialog::showAbout);
+}
+
+
+void Dialog::showConfiguration()
+{
+    const QString defltCmd;
+    const QString colorCmd = _settings->value(_SettingsScanColor, defltCmd).toString();
+    const QString monoCmd = _settings->value(_SettingsScanMono, defltCmd).toString();
+
+    ui->leMonoScanCmd->setText(monoCmd);
+    ui->leColorScanCmd->setText(colorCmd);
+
+    ui->widgetStack->setCurrentIndex(_IndxConfig);
+    updateInfoText(ProcessStatus::ConfigPage);
+
+    ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(true);
+}
+
+void Dialog::showAbout()
+{
+    ui->widgetStack->setCurrentIndex(_IndxAbout);
+    updateInfoText(ProcessStatus::AboutPage);
+
+    ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(false);
+}
+
+void Dialog::showList()
+{
+    ui->widgetStack->setCurrentIndex(_IndxListView);
+    updateInfoText(ProcessStatus::Unknown);
+
+    bool showSave = _model.hasImages();
+    ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(showSave);
 }
 
 void Dialog::slotListViewSize(QSize s)
@@ -110,16 +181,34 @@ void Dialog::slotButtonClicked(QAbstractButton *button)
     const QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
 
     if( button == ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)) {
-        QStringList files = _model.files();
+        int currIndx = ui->widgetStack->currentIndex();
+        if ( currIndx == _IndxListView || currIndx == _IndxAbout) {
+            QStringList files = _model.files();
 
-        const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
-        if (!saveFile.isEmpty()) {
-            Executor *creator = new Executor;
-            connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
-            creator->setOutputFile(saveFile);
-            QApplication::setOverrideCursor(Qt::WaitCursor);
-            updateInfoText(ProcessStatus::CreatingPdf);
-            creator->buildPdf(files);
+            const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
+            if (!saveFile.isEmpty()) {
+                Executor *creator = new Executor;
+                connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
+                creator->setOutputFile(saveFile);
+                QApplication::setOverrideCursor(Qt::WaitCursor);
+                updateInfoText(ProcessStatus::CreatingPdf);
+                creator->buildPdf(files);
+            }
+        } else if (currIndx == _IndxConfig) {
+            const QString colorCmd = ui->leColorScanCmd->text();
+            if (colorCmd.isEmpty()) {
+                _settings->remove(_SettingsScanColor);
+            } else {
+                _settings->setValue(_SettingsScanColor, colorCmd);
+            }
+            const QString monoCmd = ui->leMonoScanCmd->text();
+            if (monoCmd.isEmpty()) {
+                _settings->remove(_SettingsScanMono);
+            } else {
+                _settings->setValue(_SettingsScanMono, monoCmd);
+            }
+
+            showList();
         }
     }
 }
@@ -131,10 +220,15 @@ void Dialog::accept()
 
 void Dialog::reject()
 {
-    if (_scanner != nullptr) {
-        _scanner->stop();
+    int currIndx = ui->widgetStack->currentIndex();
+    if ( currIndx == _IndxConfig || currIndx == _IndxAbout) {
+        showList();
+    } else {
+        if (_scanner != nullptr) {
+            _scanner->stop();
+        }
+        QDialog::reject();
     }
-    QDialog::reject();
 }
 
 void Dialog::pdfCreatorFinished(bool success)
@@ -182,7 +276,7 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
     bool openExternal {false};
     switch(stat) {
     case ProcessStatus::Unknown:
-        str = tr("An unknown state is happenening.");
+        str = QString();
                 break;
     case ProcessStatus::JustStarted:
         str =  tr("No images loaded. Load from scanner or file using the buttons above.");
@@ -206,6 +300,15 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
     case ProcessStatus::CreatingPdf:
         str = tr("Creating the PDF...");
         break;
+    case ProcessStatus::ConfigPage:
+        str = tr("Handle config parameters and click the Save button.");
+        break;
+    case ProcessStatus::NotConfigured:
+        str = tr("The scan command is not configured. Check Config first!");
+        break;
+    case ProcessStatus::AboutPage:
+        str = tr("Click the Close button to continue.");
+        break;
     }
 
     ui->labInfo->setOpenExternalLinks(openExternal);
@@ -217,10 +320,20 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
 void Dialog::slotFromScanner()
 {
     QString scanCmd;
-    const QString defltCmd{ "scanimage --mode 'Grey' --resolution 150 -l 0 -t 0 -x 210 -y 297 --format png"};
+    // cmd for network brother MFD scanner:
+    // scanimage --mode 'Grey' --resolution 150 -l 0 -t 0 -x 210 -y 297 --format png
+    const QString defltCmd{""};
 
-    scanCmd = _settings->value(_SettingsScanBW, defltCmd ).toString();
+    bool color = ui->cbColorScan->isChecked();
+    if (color)
+        scanCmd = _settings->value(_SettingsScanColor, defltCmd ).toString();
+    else
+        scanCmd = _settings->value(_SettingsScanMono, defltCmd ).toString();
 
+    if (scanCmd == defltCmd) {
+        updateInfoText(ProcessStatus::NotConfigured);
+        return;
+    }
     _scanner = new Executor;
     _scanner->setCommand(scanCmd);
 

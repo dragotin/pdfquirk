@@ -8,6 +8,7 @@ add_executable(pdfquirk
     imagelistdelegate.h
     executor.cpp
     executor.h
+    version.h
     dialog.h
     dialog.ui
     ../resources/pdfquirk.qrc

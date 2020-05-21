@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="resources">
     <file>logo2_200x200.png</file>
+    <file>menu.svg</file>
+    <file>menu-red-16.png</file>
   </qresource>
 </RCC>

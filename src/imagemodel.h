@@ -31,6 +31,7 @@ public:
 
     static QSize ImageSize() { return QSize(200, 282); }
 
+    int hasImages() { return _pixmaps.size() > 0; }
 public slots:
     void addImageFile( const QString& file );
     void clear();

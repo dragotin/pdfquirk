@@ -28,6 +28,8 @@ namespace Ui { class Dialog; }
 QT_END_NAMESPACE
 
 class QAbstractButton;
+class QToolButton;
+
 class ImageListDelegate;
 class Executor;
 
@@ -59,7 +61,10 @@ public:
         PDFCreated,
         ScanFailed,
         Scanning,
-        CreatingPdf
+        CreatingPdf,
+        ConfigPage,
+        AboutPage,
+        NotConfigured
     };
 
 public slots:
@@ -77,18 +82,28 @@ private slots:
     void startLengthyOperation();
     void endLengthyOperation();
 
+    void showConfiguration();
+    void showAbout();
+    void showList();
+
 private:
     void updateInfoText(ProcessStatus stat, const QString& saveFile = QString());
+    void buildMenu(QToolButton *button);
+
+    const int _IndxListView {0};
+    const int _IndxConfig {1};
+    const int _IndxAbout {2};
 
     Ui::Dialog *ui;
 
     const QString _SettingsLastFilePath {"lastFilePath"};
-    const QString _SettingsScanBW{"scanCmdMonochrome"};
+    const QString _SettingsScanMono{"scanCmdMonochrome"};
+    const QString _SettingsScanColor{"scanCmdColor"};
 
     ImageModel _model;
     QString _lastPath;
     QScopedPointer<QSettings> _settings;
-    ImageListDelegate *_delegate;
+    QScopedPointer<ImageListDelegate> _delegate;
     bool _lengthyOpRunning { false };
     Executor *_scanner {nullptr};
 };

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=pdfquirk %u 
+Icon=pdfquirk
+Terminal=false
+Name=PDFQuirk
+Name[de]=PDFQuirk
+Name[x-test]=xxPDFQuirkxx
+Categories=Office;

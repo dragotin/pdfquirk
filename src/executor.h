@@ -28,9 +28,10 @@ class Executor : public QObject
     Q_OBJECT
 public:
     explicit Executor(QObject *parent = nullptr);
+    ~Executor();
 
     void buildPdf(const QStringList& files);
-    bool scan(bool colorMode);
+    bool scan();
 
     void setOutputFile(const QString& fileName);
     QString outputFile();

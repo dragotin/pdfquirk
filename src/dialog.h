@@ -76,7 +76,7 @@ private slots:
     void slotFromScanner();
     void slotButtonClicked(QAbstractButton *button);
     void pdfCreatorFinished(bool success);
-    void slotScanFinished(bool success);
+    void slotScanFinished(int exitCode);
     void slotListViewSize(QSize s);
 
     void startLengthyOperation();

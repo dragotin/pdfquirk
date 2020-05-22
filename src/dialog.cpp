@@ -339,7 +339,7 @@ void Dialog::slotFromScanner()
 
     connect(_scanner, &Executor::finished, this, &Dialog::slotScanFinished);
     startLengthyOperation();
-    if (!_scanner->scan(false)) {
+    if (!_scanner->scan()) {
         slotScanFinished(false);
     } else {
         updateInfoText(ProcessStatus::Scanning);
@@ -347,7 +347,7 @@ void Dialog::slotFromScanner()
 
 }
 
-void Dialog::slotScanFinished(bool success)
+void Dialog::slotScanFinished(int exitCode)
 {
     // get the result file name from the creator object.
     QString resultFile;
@@ -356,12 +356,12 @@ void Dialog::slotScanFinished(bool success)
         delete _scanner;
         _scanner = nullptr;
     }
-    if (success) {
+    if (exitCode == 0) {
         _model.addImageFile(resultFile);
     }
     endLengthyOperation();
 
-    if (_model.rowCount() && success)
+    if (_model.rowCount() && exitCode == 0)
         updateInfoText(ProcessStatus::ImageScanned, resultFile);
     else
         updateInfoText(ProcessStatus::ScanFailed);

@@ -29,6 +29,17 @@ Executor::Executor(QObject *parent)
 
 }
 
+Executor::~Executor()
+{
+    if (_process != nullptr) {
+        if (_process->state() == QProcess::Running) {
+            _process->kill();
+            qDebug() << "KILLED the process!";
+        }
+        delete _process;
+    }
+}
+
 QString Executor::outputFile()
 {
     return _outputFile;
@@ -63,31 +74,28 @@ void Executor::buildPdf(const QStringList& files)
         _process = new QProcess;
         connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, &Executor::slotFinished);
+
         _process->start("convert", args);
     } else {
         slotFinished(-3, QProcess::ExitStatus::NormalExit);
     }
 }
 
-bool Executor::scan(bool colorMode)
+bool Executor::scan()
 {
     QTemporaryDir dir;
     dir.setAutoRemove(false);
 
     _outputFile = dir.filePath("scan.png");
-    QProcess *process = new QProcess;
+    _process = new QProcess;
+    _process->setStandardOutputFile(_outputFile);
 
-    QString cmd = _cmd;
+    qDebug() << "Starting" << _cmd;
 
-    cmd.append(" -o ");
-    cmd.append(_outputFile);
-
-    qDebug() << "Starting" << cmd;
-
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+    connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, &Executor::slotFinished);
 
-    process->start(cmd);
+    _process->start(_cmd);
 
     return true;
 }
@@ -95,10 +103,10 @@ bool Executor::scan(bool colorMode)
 
 void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    emit finished(exitCode >= 0); // FIXME
-
-    delete _process;
-    _process = nullptr;
+    if (_process) {
+        qDebug() << "stderr output: " << _process->readAllStandardError();
+    }
+    emit finished(exitCode); // FIXME
 }
 
 

@@ -21,6 +21,55 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QDebug>
+#include <QRegExp>
+
+namespace {
+
+// QProcess is a bit of a false friend when it comes to passing the command as
+// string. If the command uses quotes it goes wrong with the string command.
+// The command arguments have to be passed as StringList.
+// The following method parses the command string and returns a Stringlist
+// trying to handle the quotes properly.
+
+QStringList parseStringArgs(const QString& cmd)
+{
+    bool openSingle {false};
+    QStringList l = cmd.split(QRegExp(" +"));
+    QStringList re;
+    QString escaped;
+    for (auto part : l) {
+        if (part.startsWith(QChar('\''))) {
+            if (openSingle) {
+                qDebug() << "ERROR: Open single found twice.";
+                return QStringList();
+            }
+            openSingle = true;
+            escaped = part.mid(1); // skip the '
+        } else if (part.endsWith(QChar('\''))) {
+            if (!openSingle) {
+                qDebug() << "ERROR: Close single but no open.";
+                return QStringList();
+            }
+            openSingle = false;
+            escaped.append(" ");
+            part.chop(1);
+            escaped.append(part);
+            re.append(escaped);
+            escaped.clear();
+        } else {
+            if (openSingle) {
+                escaped.append(" ");
+                escaped.append(part);
+            } else {
+                re.append(part);
+            }
+        }
+    }
+    return re;
+}
+
+}
+
 
 Executor::Executor(QObject *parent)
     : QObject(parent),
@@ -81,28 +130,42 @@ void Executor::buildPdf(const QStringList& files)
     }
 }
 
-bool Executor::scan()
+bool Executor::scan(const QString& cmd)
 {
-    QTemporaryDir dir;
-    dir.setAutoRemove(false);
+    bool result {false};
 
-    _outputFile = dir.filePath("scan.png");
-    _process = new QProcess;
-    _process->setStandardOutputFile(_outputFile);
+    QStringList args  = parseStringArgs(cmd);
+    if (args.size() > 0) {
+        QTemporaryDir dir;
+        dir.setAutoRemove(false);
 
-    qDebug() << "Starting" << _cmd;
+        _outputFile = dir.filePath("scan.png");
+        _process = new QProcess;
 
-    connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, &Executor::slotFinished);
+        // if the args contain the %OUTFILE tag, replace that with the temp file
+        // otherwise set the standard out file accordingly.
+        int outPos = args.indexOf(OutfileTag);
+        if (outPos > -1 ) {
+            args.replace(outPos, _outputFile);
+        } else {
+            _process->setStandardOutputFile(_outputFile);
+        }
 
-    _process->start(_cmd);
+        const QString bin = args.takeFirst();
+        connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this, &Executor::slotFinished);
 
-    return true;
+        qDebug() << "Starting" << bin << args;
+        _process->start(bin, args);
+        result = true;
+    }
+    return result;
 }
 
 
 void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    Q_UNUSED(exitStatus)
     if (_process) {
         qDebug() << "stderr output: " << _process->readAllStandardError();
     }

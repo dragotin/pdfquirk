@@ -335,11 +335,10 @@ void Dialog::slotFromScanner()
         return;
     }
     _scanner = new Executor;
-    _scanner->setCommand(scanCmd);
 
     connect(_scanner, &Executor::finished, this, &Dialog::slotScanFinished);
     startLengthyOperation();
-    if (!_scanner->scan()) {
+    if (!_scanner->scan(scanCmd)) {
         slotScanFinished(false);
     } else {
         updateInfoText(ProcessStatus::Scanning);

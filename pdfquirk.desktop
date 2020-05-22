@@ -7,3 +7,5 @@ Name=PDFQuirk
 Name[de]=PDFQuirk
 Name[x-test]=xxPDFQuirkxx
 Categories=Office;
+GenericName=Create PDFs from images and scans
+GenericName[de]=PDFs aus Bildern und vom Scanner erstellen

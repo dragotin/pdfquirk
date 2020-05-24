@@ -117,7 +117,7 @@ void Executor::buildPdf(const QStringList& files)
         const QString argstr {"-resize 1240x1753 -gravity center -units PixelsPerInch -density 150x150 -background white -extent 1240x1753"};
 
         args.append(files);
-        args.append(argstr.split(' '));
+        args.append(parseStringArgs(argstr));
         args.append(_outputFile);
 
         _process = new QProcess;
@@ -136,10 +136,6 @@ bool Executor::scan(const QString& cmd)
 
     QStringList args  = parseStringArgs(cmd);
     if (args.size() > 0) {
-        QTemporaryDir dir;
-        dir.setAutoRemove(false);
-
-        _outputFile = dir.filePath("scan.png");
         _process = new QProcess;
 
         // if the args contain the %OUTFILE tag, replace that with the temp file

@@ -31,6 +31,7 @@
 #include <QtGlobal>
 #include <QScrollBar>
 #include <QMenu>
+#include <QTemporaryDir>
 
 #include "imagelistdelegate.h"
 #include "executor.h"
@@ -178,22 +179,11 @@ void Dialog::slotListViewSize(QSize s)
 void Dialog::slotButtonClicked(QAbstractButton *button)
 {
     if (!button) return;
-    const QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
 
     if( button == ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)) {
         int currIndx = ui->widgetStack->currentIndex();
         if ( currIndx == _IndxListView || currIndx == _IndxAbout) {
-            QStringList files = _model.files();
-
-            const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
-            if (!saveFile.isEmpty()) {
-                Executor *creator = new Executor;
-                connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
-                creator->setOutputFile(saveFile);
-                QApplication::setOverrideCursor(Qt::WaitCursor);
-                updateInfoText(ProcessStatus::CreatingPdf);
-                creator->buildPdf(files);
-            }
+            startPdfCreation();
         } else if (currIndx == _IndxConfig) {
             const QString colorCmd = ui->leColorScanCmd->text();
             if (colorCmd.isEmpty()) {
@@ -231,7 +221,23 @@ void Dialog::reject()
     }
 }
 
-void Dialog::pdfCreatorFinished(bool success)
+void Dialog::startPdfCreation()
+{
+    const QStringList files = _model.files();
+    const QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
+
+    const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
+    if (!saveFile.isEmpty()) {
+        Executor *creator = new Executor;
+        connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
+        creator->setOutputFile(saveFile);
+        startLengthyOperation();
+        updateInfoText(ProcessStatus::CreatingPdf);
+        creator->buildPdf(files);
+    }
+}
+
+void Dialog::pdfCreatorFinished(int success)
 {
     QApplication::restoreOverrideCursor();
 
@@ -242,10 +248,25 @@ void Dialog::pdfCreatorFinished(bool success)
         resultFile = creator->outputFile();
         creator->deleteLater();
     }
-    if (success) {
+
+    if (success == 0) {
+        // cleanup: remove the scanned pages
+        for (auto file : _scans) {
+            QFileInfo fi(file);
+            QDir d = fi.absoluteDir();
+            const QString fileStr = fi.absoluteFilePath();
+            QFile::remove(fileStr);
+            if (d.isEmpty()) {
+                d.removeRecursively();
+            }
+        }
+        _scans.clear();
         _model.clear();
+        updateInfoText(ProcessStatus::PDFCreated, resultFile);
+    } else {
+        updateInfoText(ProcessStatus::PDFCreatedFailed);
     }
-    updateInfoText(ProcessStatus::PDFCreated, resultFile);
+    endLengthyOperation();
 }
 
 void Dialog::slotFromFile()
@@ -309,6 +330,9 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
     case ProcessStatus::AboutPage:
         str = tr("Click the Close button to continue.");
         break;
+    case ProcessStatus::PDFCreatedFailed:
+        str = tr("The PDF could not be created.");
+        break;
     }
 
     ui->labInfo->setOpenExternalLinks(openExternal);
@@ -335,11 +359,16 @@ void Dialog::slotFromScanner()
         return;
     }
     _scanner = new Executor;
-    _scanner->setCommand(scanCmd);
+
+    QTemporaryDir dir;
+    dir.setAutoRemove(false);
+    const QString outputFile = dir.filePath("scan.png");
+
+    _scanner->setOutputFile(outputFile);
 
     connect(_scanner, &Executor::finished, this, &Dialog::slotScanFinished);
     startLengthyOperation();
-    if (!_scanner->scan(false)) {
+    if (!_scanner->scan(scanCmd)) {
         slotScanFinished(false);
     } else {
         updateInfoText(ProcessStatus::Scanning);
@@ -347,7 +376,7 @@ void Dialog::slotFromScanner()
 
 }
 
-void Dialog::slotScanFinished(bool success)
+void Dialog::slotScanFinished(int exitCode)
 {
     // get the result file name from the creator object.
     QString resultFile;
@@ -356,15 +385,21 @@ void Dialog::slotScanFinished(bool success)
         delete _scanner;
         _scanner = nullptr;
     }
-    if (success) {
+    // exitCode 0 is success
+    if (exitCode == 0 && !resultFile.isEmpty()) {
         _model.addImageFile(resultFile);
+
+        if (_model.rowCount()) {
+            updateInfoText(ProcessStatus::ImageScanned, resultFile);
+
+            // remember the scanned file.
+            _scans.append(resultFile);
+        }
+
+    } else {
+        updateInfoText(ProcessStatus::ScanFailed);
     }
     endLengthyOperation();
-
-    if (_model.rowCount() && success)
-        updateInfoText(ProcessStatus::ImageScanned, resultFile);
-    else
-        updateInfoText(ProcessStatus::ScanFailed);
 }
 
 void Dialog::startLengthyOperation()

@@ -21,12 +21,72 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QDebug>
+#include <QRegExp>
+
+namespace {
+
+// QProcess is a bit of a false friend when it comes to passing the command as
+// string. If the command uses quotes it goes wrong with the string command.
+// The command arguments have to be passed as StringList.
+// The following method parses the command string and returns a Stringlist
+// trying to handle the quotes properly.
+
+QStringList parseStringArgs(const QString& cmd)
+{
+    bool openSingle {false};
+    QStringList l = cmd.split(QRegExp(" +"));
+    QStringList re;
+    QString escaped;
+    for (auto part : l) {
+        if (part.startsWith(QChar('\''))) {
+            if (openSingle) {
+                qDebug() << "ERROR: Open single found twice.";
+                return QStringList();
+            }
+            openSingle = true;
+            escaped = part.mid(1); // skip the '
+        } else if (part.endsWith(QChar('\''))) {
+            if (!openSingle) {
+                qDebug() << "ERROR: Close single but no open.";
+                return QStringList();
+            }
+            openSingle = false;
+            escaped.append(" ");
+            part.chop(1);
+            escaped.append(part);
+            re.append(escaped);
+            escaped.clear();
+        } else {
+            if (openSingle) {
+                escaped.append(" ");
+                escaped.append(part);
+            } else {
+                re.append(part);
+            }
+        }
+    }
+    return re;
+}
+
+}
+
 
 Executor::Executor(QObject *parent)
     : QObject(parent),
       _outputFile {"/tmp/foo.pdf"}
 {
 
+}
+
+Executor::~Executor()
+{
+    if (_process != nullptr) {
+        if (_process->state() == QProcess::Running) {
+            _process->kill();
+            qDebug() << "KILLED the process!";
+        }
+        delete _process;
+    }
 }
 
 QString Executor::outputFile()
@@ -57,48 +117,55 @@ void Executor::buildPdf(const QStringList& files)
         const QString argstr {"-resize 1240x1753 -gravity center -units PixelsPerInch -density 150x150 -background white -extent 1240x1753"};
 
         args.append(files);
-        args.append(argstr.split(' '));
+        args.append(parseStringArgs(argstr));
         args.append(_outputFile);
 
         _process = new QProcess;
         connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, &Executor::slotFinished);
+
         _process->start("convert", args);
     } else {
         slotFinished(-3, QProcess::ExitStatus::NormalExit);
     }
 }
 
-bool Executor::scan(bool colorMode)
+bool Executor::scan(const QString& cmd)
 {
-    QTemporaryDir dir;
-    dir.setAutoRemove(false);
+    bool result {false};
 
-    _outputFile = dir.filePath("scan.png");
-    QProcess *process = new QProcess;
+    QStringList args  = parseStringArgs(cmd);
+    if (args.size() > 0) {
+        _process = new QProcess;
 
-    QString cmd = _cmd;
+        // if the args contain the %OUTFILE tag, replace that with the temp file
+        // otherwise set the standard out file accordingly.
+        int outPos = args.indexOf(OutfileTag);
+        if (outPos > -1 ) {
+            args.replace(outPos, _outputFile);
+        } else {
+            _process->setStandardOutputFile(_outputFile);
+        }
 
-    cmd.append(" -o ");
-    cmd.append(_outputFile);
+        const QString bin = args.takeFirst();
+        connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this, &Executor::slotFinished);
 
-    qDebug() << "Starting" << cmd;
-
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, &Executor::slotFinished);
-
-    process->start(cmd);
-
-    return true;
+        qDebug() << "Starting" << bin << args;
+        _process->start(bin, args);
+        result = true;
+    }
+    return result;
 }
 
 
 void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    emit finished(exitCode >= 0); // FIXME
-
-    delete _process;
-    _process = nullptr;
+    Q_UNUSED(exitStatus)
+    if (_process) {
+        qDebug() << "stderr output: " << _process->readAllStandardError();
+    }
+    emit finished(exitCode); // FIXME
 }
 
 

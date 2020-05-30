@@ -28,9 +28,10 @@ class Executor : public QObject
     Q_OBJECT
 public:
     explicit Executor(QObject *parent = nullptr);
+    ~Executor();
 
     void buildPdf(const QStringList& files);
-    bool scan(bool colorMode);
+    bool scan(const QString &cmd);
 
     void setOutputFile(const QString& fileName);
     QString outputFile();
@@ -48,6 +49,7 @@ private slots:
     void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    const QString OutfileTag {"%OUTFILE"};
     QString _outputFile;
     QString _cmd;
     QProcess *_process {nullptr};

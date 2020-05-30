@@ -64,7 +64,8 @@ public:
         CreatingPdf,
         ConfigPage,
         AboutPage,
-        NotConfigured
+        NotConfigured,
+        PDFCreatedFailed
     };
 
 public slots:
@@ -75,8 +76,8 @@ private slots:
     void slotFromFile();
     void slotFromScanner();
     void slotButtonClicked(QAbstractButton *button);
-    void pdfCreatorFinished(bool success);
-    void slotScanFinished(bool success);
+    void pdfCreatorFinished(int success);
+    void slotScanFinished(int exitCode);
     void slotListViewSize(QSize s);
 
     void startLengthyOperation();
@@ -89,6 +90,7 @@ private slots:
 private:
     void updateInfoText(ProcessStatus stat, const QString& saveFile = QString());
     void buildMenu(QToolButton *button);
+    void startPdfCreation();
 
     const int _IndxListView {0};
     const int _IndxConfig {1};
@@ -106,5 +108,6 @@ private:
     QScopedPointer<ImageListDelegate> _delegate;
     bool _lengthyOpRunning { false };
     Executor *_scanner {nullptr};
+    QStringList _scans;
 };
 #endif // DIALOG_H

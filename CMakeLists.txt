@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 project(pdfquirk LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+find_package(ECM REQUIRED NO_MODULE)
+list(APPEND CMAKE_MODULE_PATH "${ECM_MODULE_PATH}")
+
+include(ECMInstallIcons)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -20,4 +24,5 @@ add_subdirectory(src)
 set (XDG_APPS_INSTALL_DIR "share/applications" CACHE STRING "The XDG apps dir")
 
 install(FILES pdfquirk.desktop DESTINATION ${XDG_APPS_INSTALL_DIR} RENAME de.volle_kraft_voraus.pdfquirk.desktop)
+ecm_install_icons( ICONS resources/64-apps-pdfquirk.png DESTINATION share/icons)
 

@@ -411,20 +411,19 @@ void Dialog::slotScanFinished(int exitCode)
 
 void Dialog::startLengthyOperation()
 {
-    if (_lengthyOpRunning) return;
     ui->pbAddFromFile->setEnabled(false);
     ui->pbAddFromScanner->setEnabled(false);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    _lengthyOpRunning = true;
-}
+    if (QApplication::overrideCursor() == nullptr)
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+ }
 
 void Dialog::endLengthyOperation()
 {
-    if (!_lengthyOpRunning) return;
+    if (QApplication::overrideCursor() != nullptr) {
+        QApplication::restoreOverrideCursor();
+    }
     ui->pbAddFromFile->setEnabled(true);
     ui->pbAddFromScanner->setEnabled(true);
-    QApplication::restoreOverrideCursor();
-    _lengthyOpRunning = true;
 }
 
 Dialog::~Dialog()

@@ -106,7 +106,6 @@ private:
     QString _lastPath;
     QScopedPointer<QSettings> _settings;
     QScopedPointer<ImageListDelegate> _delegate;
-    bool _lengthyOpRunning { false };
     Executor *_scanner {nullptr};
     QStringList _scans;
 };

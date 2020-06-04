@@ -31,10 +31,6 @@ ImageListDelegate::ImageListDelegate(QObject *parent)
 void ImageListDelegate::initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const
 {
   QStyledItemDelegate::initStyleOption(o, idx);
-  // to hide the display role all we need to do is remove the HasDisplay feature
-  // just hides the display role
-  if (!_displayRoleEnabled)
-    o->features &= ~QStyleOptionViewItem::HasDisplay;
 }
 
 void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -78,6 +74,8 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 QSize ImageListDelegate::sizeHint(const QStyleOptionViewItem &  option ,
                                   const QModelIndex &  index ) const
 {
+    Q_UNUSED(option)
+    Q_UNUSED(index)
     return _size;
 }
 

@@ -38,8 +38,6 @@ protected:
     void initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const override;
 
 private:
-    // simple public member to toggle the display role (create getter/setter if you prefer)
-    bool _displayRoleEnabled = false;
     QSize _size;
 };
 

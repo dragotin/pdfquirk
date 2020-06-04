@@ -20,9 +20,13 @@
 #include<QImage>
 #include<QIcon>
 #include<QFileInfo>
-
+#include<QDebug>
+#include<QMimeData>
+#include <QUrl>
+#include <QStandardItemModel>
 
 ImageModel::ImageModel()
+    :QAbstractListModel()
 {
 
 }
@@ -32,28 +36,75 @@ QStringList ImageModel::files() const
     return _pathes;
 }
 
-void ImageModel::addImageFile( const QString& file )
+Qt::DropActions ImageModel::supportedDropActions() const
+{
+    return Qt::MoveAction;
+}
+
+Qt::ItemFlags ImageModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+
+    if (!index.isValid())
+        flags |= Qt::ItemIsDropEnabled;
+    if (rowCount() > 1)
+        flags |= Qt::ItemIsDragEnabled;
+    return flags;
+}
+
+bool ImageModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+{
+    qDebug() << "Drop Mime Data";
+
+    if (!canDropMimeData(data, action, row, column, parent)) {
+        return false;
+    }
+
+    if (action == Qt::IgnoreAction) {
+        return true;
+    }
+
+    int userow;
+    if (row != -1)
+        userow = row;
+    else if (parent.isValid())
+        userow = parent.row();
+    else
+        userow = rowCount(QModelIndex());
+
+    QList<QUrl> urls = data->urls();
+
+    for (auto url : urls) {
+        QModelIndex idx = index(userow++, 0, QModelIndex());
+        addImageFile(url.toLocalFile(), idx.row());
+    }
+    return true;
+}
+
+void ImageModel::addImageFile( const QString& file, int row )
 {
     QFileInfo fi(file);
     if (!fi.exists()) {
         return;
     }
+
     QPixmap pix;
     pix.load(file);
 
-    int rold = _pixmaps.size();
-    QModelIndex fromIdx = createIndex(rold, 0);
-    QModelIndex toIdx = createIndex(rold+1, 0);
-         //emit a signal to make the view reread identified data
-    emit dataChanged(fromIdx, toIdx, {Qt::DisplayRole});
+    if (row == -1)
+        row = _pixmaps.size();
 
-    _pixmaps.append(pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-    _pathes.append(file);
+    beginInsertRows(QModelIndex(), row, row);
+    _pixmaps.insert(row, pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    _pathes.insert(row, file);
+    endInsertRows();
 }
 
 QVariant ImageModel::data(const QModelIndex &index, int role) const
 {
     QVariant var;
+    if (!index.isValid() || index.parent().isValid())
+        return var;
 
     if (role == Qt::DecorationRole) {
         if (index.row() < _pixmaps.size()) {
@@ -65,6 +116,51 @@ QVariant ImageModel::data(const QModelIndex &index, int role) const
     }
 
     return var;
+}
+
+bool ImageModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    if (parent.isValid())
+        return false;
+    beginRemoveRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; i++) {
+        _pixmaps.removeAt(row+i);
+        _pathes.removeAt(row+i);
+    }
+    endRemoveRows();
+    return true;
+}
+
+QStringList ImageModel::mimeTypes() const
+ {
+    QStringList types;
+    types << QStringLiteral("image/*");
+    types << QStringLiteral("text/uri-list");
+    return types;
+}
+
+bool ImageModel::canDropMimeData(const QMimeData *data,
+                                 Qt::DropAction action, int row, int /*column*/, const QModelIndex& /*parent*/) const
+{
+    bool re { false };
+    if ( action == Qt::MoveAction && data->hasUrls()) {
+        re = true;
+    }
+    // qDebug() << "CanDrop on" << row << re;
+    return re;
+}
+
+QMimeData* ImageModel::mimeData(const QModelIndexList &indexes) const
+{
+    QMimeData* mimeData = new QMimeData;
+    QList<QUrl> urls;
+    for (auto idx : indexes) {
+        int r = idx.row();
+        urls.append(QUrl::fromLocalFile(_pathes.at(r)));
+    }
+
+    mimeData->setUrls(urls);
+    return mimeData;
 }
 
 int ImageModel::rowCount(const QModelIndex &parent) const
@@ -79,5 +175,6 @@ void ImageModel::clear()
 {
     emit beginResetModel();
     _pixmaps.clear();
+    _pathes.clear();
     emit endResetModel();
 }

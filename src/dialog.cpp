@@ -87,10 +87,17 @@ Dialog::Dialog(QWidget *parent)
     ui->listviewThumbs->setModel(&_model);
     _delegate.reset(new ImageListDelegate());
     ui->listviewThumbs->setItemDelegate(_delegate.data());
-    ui->listviewThumbs->setSelectionMode(QAbstractItemView::NoSelection);
     ui->listviewThumbs->setResizeMode(QListView::Adjust);
     ui->listviewThumbs->setMaximumHeight(300);
     ui->listviewThumbs->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
+
+    ui->listviewThumbs->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->listviewThumbs->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    ui->listviewThumbs->setDragEnabled(true);
+    ui->listviewThumbs->setAcceptDrops(true);
+    ui->listviewThumbs->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->listviewThumbs->setAcceptDrops(true);
+    ui->listviewThumbs->setDropIndicatorShown(true);
 
     QFont f = ui->listviewThumbs->font();
     QFontMetrics fm(f);

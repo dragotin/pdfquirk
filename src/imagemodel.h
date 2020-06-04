@@ -32,16 +32,27 @@ public:
     static QSize ImageSize() { return QSize(200, 282); }
 
     int hasImages() { return _pixmaps.size() > 0; }
-public slots:
-    void addImageFile( const QString& file );
-    void clear();
 
-public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-private:
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::DropActions supportedDropActions() const override;
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                      const QModelIndex &parent) override;
 
+    bool removeRows(int row, int count, const QModelIndex &parent) override;
+    QStringList mimeTypes() const override;
+    bool canDropMimeData(const QMimeData *data,
+                         Qt::DropAction action, int /*row*/, int /*column*/,
+                         const QModelIndex& /*parent*/) const override;
+    QMimeData* mimeData(const QModelIndexList &indexes) const override;
+
+public slots:
+    void addImageFile(const QString& file , int row = -1);
+    void clear();
+
+private:
     QList<QPixmap> _pixmaps;
     QStringList _pathes;
 };

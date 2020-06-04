@@ -6,6 +6,6 @@ Terminal=false
 Name=PDFQuirk
 Name[de]=PDFQuirk
 Name[x-test]=xxPDFQuirkxx
-Categories=Office;
+Categories=Scanning;ImageProcessing;Printing;
 GenericName=Create PDFs from images and scans
 GenericName[de]=PDFs aus Bildern und vom Scanner erstellen

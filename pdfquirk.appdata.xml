@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>pdfquirk</id>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>GPL-2.0+</project_license>
+	<name>PDF Quirk</name>
+	<summary>Create PDFs from images easily and fast</summary>
+	<description>
+		<p>PDF Quirk is a utility to create PDFs from images easily and fast. The images can either be loaded from storage or directly be scanned.
+
+It is a really easy to use application for the desktop, useful for everybody who has a scanner or MFD printer.</p>
+	</description>
+	<launchable type="desktop-id">pdfquirk.desktop</launchable>
+	<url type="homepage">https://dragotin.github.io/quirksite/</url>
+	<screenshots>
+		<screenshot type="default">
+			<image>https://raw.githubusercontent.com/dragotin/pdfquirk/master/resources/screenshot1.png</image>
+		</screenshot>
+	</screenshots>
+	<provides>
+		<id>pdfquirk.desktop</id>
+	</provides>
+</component>

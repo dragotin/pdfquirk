@@ -21,16 +21,65 @@
 #include <QModelIndex>
 #include <QRect>
 #include <QDebug>
+#include <QEvent>
+#include <QResizeEvent>
+#include <QMenu>
+
 
 ImageListDelegate::ImageListDelegate(QObject *parent)
     :QStyledItemDelegate(parent)
 {
+    _menu.reset(new QMenu(tr("Image Actions")));
 
+    _flipAct = new QAction(QIcon::fromTheme("object-flip-vertical-symbolic"), tr("Flip image vertically"), parent);
+    // _flipAct->setShortcuts(QKeySequence::F);
+    connect(_flipAct, &QAction::triggered, this, &ImageListDelegate::flipImage);
+    _deleteAct = new QAction(QIcon::fromTheme("edit-delete-symbolic"), tr("Remove Image"), parent);
+    connect(_deleteAct, &QAction::triggered, this, &ImageListDelegate::deleteImage);
+    _rotateLeftAct = new QAction(QIcon::fromTheme("object-flip-vertical-symbolic"), tr("Rotate image left"), parent);
+    // _flipAct->setShortcuts(QKeySequence::F);
+    connect(_rotateLeftAct, &QAction::triggered, this, &ImageListDelegate::rotateImageLeft);
+    _rotateRightAct = new QAction(QIcon::fromTheme("object-flip-vertical-symbolic"), tr("Rotate image right"), parent);
+    // _flipAct->setShortcuts(QKeySequence::F);
+    connect(_rotateRightAct, &QAction::triggered, this, &ImageListDelegate::rotateImageRight);
+
+    _menu->addAction(_flipAct);
+    _menu->addAction(_rotateLeftAct);
+    _menu->addAction(_rotateRightAct);
+    _menu->addAction(_deleteAct);
 }
 
 void ImageListDelegate::initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const
 {
-  QStyledItemDelegate::initStyleOption(o, idx);
+    QStyledItemDelegate::initStyleOption(o, idx);
+}
+
+void ImageListDelegate::showContextMenu(const QPoint& globalPos) {
+    _menu->exec(globalPos);
+}
+
+bool ImageListDelegate::editorEvent(
+        QEvent* event,
+        QAbstractItemModel* model,
+        const QStyleOptionViewItem& option,
+        const QModelIndex& index )
+{
+    QMouseEvent* mouseEvent = NULL;
+
+    if (event->type() == QEvent::MouseButtonRelease) {
+        // This is only safe because we've checked the type first.
+        mouseEvent = static_cast<QMouseEvent*>(event);
+    }
+
+    if (mouseEvent and mouseEvent->button() == Qt::RightButton) {
+        showContextMenu(mouseEvent->globalPos());
+
+        // Return true to indicate that we have handled the event.
+        // Note: This means that we won't get any default behavior!
+        return true;
+    }
+
+    return QAbstractItemDelegate::editorEvent(event, model, option, index);
 }
 
 void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -45,12 +94,16 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    if (option.state & QStyle::State_Selected)
+    bool selected {false};
+    if (option.state & QStyle::State_Selected) {
         painter->setBrush(option.palette.highlightedText());
-    else
-        painter->setBrush(QBrush(Qt::black));
+        selected = true;
+    } else {
+        painter->setBrush(QBrush(Qt::green));
+    }
 
     const QString pageStr = index.data().toString();
+    qDebug() << "Item " << pageStr << "is selected:" << selected;
     int textH = option.fontMetrics.boundingRect(pageStr).height();
     int imgH = option.rect.height() - textH - 3;           // one pix above and below and one at bottom
     int desiredW = qRound( imgH / 1.41) -4;                // 2 pix margin each side.
@@ -60,7 +113,7 @@ void ImageListDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
     const QPixmap pix = index.data(Qt::DecorationRole).value<QPixmap>().scaled(imgW, imgH, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     painter->drawPixmap(option.rect.topLeft().x()+imgWMargin, 1, pix);
 
-    // a little background behinde the "Page n" text
+    // a little background behind the "Page n" text
     QRect r (option.rect.topLeft().x()+2, 2+imgH, option.rect.width()-4, textH);
     QColor color(0xC3C3C3);
     painter->fillRect(r, color);

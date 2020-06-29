@@ -32,9 +32,11 @@
 #include <QScrollBar>
 #include <QMenu>
 #include <QTemporaryDir>
+#include <QMessageBox>
 
 #include "imagelistdelegate.h"
 #include "executor.h"
+#include "pdfquirkimage.h"
 #include "version.h"
 
 namespace {
@@ -55,6 +57,12 @@ QString aboutText()
 
 } // end namespace
 
+
+SizeCatcher::SizeCatcher(QObject *parent)
+    :QObject(parent)
+{
+
+}
 
 bool SizeCatcher::eventFilter(QObject *obj, QEvent *event)
 {
@@ -99,6 +107,11 @@ Dialog::Dialog(QWidget *parent)
     ui->listviewThumbs->setAcceptDrops(true);
     ui->listviewThumbs->setDropIndicatorShown(true);
 
+    connect( _delegate.data(), &ImageListDelegate::flipImage, this, &Dialog::slotFlipImage);
+    connect( _delegate.data(), &ImageListDelegate::deleteImage, this, &Dialog::slotDeleteImage);
+    connect( _delegate.data(), &ImageListDelegate::rotateImageLeft, this, &Dialog::slotRotateImageLeft);
+    connect( _delegate.data(), &ImageListDelegate::rotateImageRight, this, &Dialog::slotRotateImageRight);
+
     QFont f = ui->listviewThumbs->font();
     QFontMetrics fm(f);
     thumbWidth += 4;
@@ -108,7 +121,7 @@ Dialog::Dialog(QWidget *parent)
     _delegate->slotThumbSize(QSize(thumbWidth, thumbHeight));
 
     // size catcher
-    SizeCatcher *sizeCatcher = new SizeCatcher;
+    SizeCatcher *sizeCatcher = new SizeCatcher(this);
     connect(sizeCatcher, &SizeCatcher::thumbSize, this, &Dialog::slotListViewSize);
     ui->listviewThumbs->installEventFilter(sizeCatcher);
 
@@ -221,11 +234,82 @@ void Dialog::reject()
     if ( currIndx == _IndxConfig || currIndx == _IndxAbout) {
         showList();
     } else {
-        if (_scanner != nullptr) {
-            _scanner->stop();
+        if (_executor != nullptr) {
+            _executor->stop();
         }
         QDialog::reject();
     }
+}
+
+int Dialog::getSelectedImageRow()
+{
+    qDebug() << "Get selected image.";
+    QItemSelectionModel *selectionModel = ui->listviewThumbs->selectionModel();
+
+    QModelIndexList selectedItemsIdx = selectionModel->selectedIndexes();
+
+    int imageNo = -1;
+    if (selectedItemsIdx.count() > 0) {
+        imageNo = selectedItemsIdx.first().row();
+    }
+
+    return imageNo;
+}
+
+void Dialog::execOpOnSelected(ImageOperation op)
+{
+    int selected = getSelectedImageRow();
+    if (selected == -1) {
+        qDebug() << "Flip: Invalid selected row";
+        return;
+    }
+    PdfQuirkImage image = _model.imageAt(selected);
+
+    if (image.isValid()) {
+        bool result {false};
+        if (op == ImageOperation::FlipImage) {
+            qDebug() << "Flipping image" << image.fileName();
+            result = _executor->flipImage(image);
+        } else if (op == ImageOperation::RotateLeft || op == ImageOperation::RotateRight) {
+            qDebug() << "Rotating image";
+            result = _executor->rotate(image, op == ImageOperation::RotateLeft ? 270 : 90);
+        } else if (op == ImageOperation::Remove) {
+            if (!image.isOurFile()) {
+                const QString text( tr("Do you want to remove image\n%1").arg(image.fileName()));
+                if (QMessageBox::StandardButton::Yes != QMessageBox::question(this, tr("Remove Image"), text)) {
+                    return; // do not remove image
+                }
+            }
+            result = _executor->removeImage(image);
+        }
+
+        if (result) {
+            qDebug() << "Image operation successfull";
+            _model.refreshImage(selected);
+        } else {
+            qDebug() << "Image operation failed!";
+        }
+    }
+}
+
+void Dialog::slotDeleteImage()
+{
+    execOpOnSelected(ImageOperation::Remove);
+}
+
+void Dialog::slotFlipImage()
+{
+    execOpOnSelected(ImageOperation::FlipImage);
+}
+
+void Dialog::slotRotateImageLeft()
+{
+    execOpOnSelected(ImageOperation::RotateLeft);
+}
+
+void Dialog::slotRotateImageRight()
+{
+    execOpOnSelected(ImageOperation::RotateRight);
 }
 
 void Dialog::startPdfCreation()
@@ -286,7 +370,7 @@ void Dialog::slotFromFile()
     for (const QString& file : files) {
         QFileInfo fi(file);
         qApp->processEvents();
-        _model.addImageFile(file);
+        _model.addImageFile(file); // add a file but it is not ours
 
         path = fi.path();
     }
@@ -365,17 +449,17 @@ void Dialog::slotFromScanner()
         updateInfoText(ProcessStatus::NotConfigured);
         return;
     }
-    _scanner = new Executor;
+    _executor = new Executor;
 
     QTemporaryDir dir;
     dir.setAutoRemove(false);
     const QString outputFile = dir.filePath("scan.png");
 
-    _scanner->setOutputFile(outputFile);
+    _executor->setOutputFile(outputFile);
 
-    connect(_scanner, &Executor::finished, this, &Dialog::slotScanFinished);
+    connect(_executor, &Executor::finished, this, &Dialog::slotScanFinished);
     startLengthyOperation();
-    if (!_scanner->scan(scanCmd)) {
+    if (!_executor->scan(scanCmd)) {
         slotScanFinished(false);
     } else {
         updateInfoText(ProcessStatus::Scanning);
@@ -387,14 +471,14 @@ void Dialog::slotScanFinished(int exitCode)
 {
     // get the result file name from the creator object.
     QString resultFile;
-    if (_scanner) {
-        resultFile = _scanner->outputFile();
-        delete _scanner;
-        _scanner = nullptr;
+    if (_executor) {
+        resultFile = _executor->outputFile();
+        delete _executor;
+        _executor = nullptr;
     }
     // exitCode 0 is success
     if (exitCode == 0 && !resultFile.isEmpty()) {
-        _model.addImageFile(resultFile);
+        _model.addImageFile(resultFile, -1, true);
 
         if (_model.rowCount()) {
             updateInfoText(ProcessStatus::ImageScanned, resultFile);

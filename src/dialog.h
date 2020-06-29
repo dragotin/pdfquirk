@@ -36,6 +36,9 @@ class Executor;
 class SizeCatcher : public QObject
 {
     Q_OBJECT
+public:
+    SizeCatcher(QObject *parent);
+
 signals:
      void thumbSize(const QSize&);
 
@@ -68,6 +71,13 @@ public:
         PDFCreatedFailed
     };
 
+    enum class ImageOperation {
+        FlipImage,
+        RotateLeft,
+        RotateRight,
+        Remove
+    };
+
 public slots:
     void accept() override;
     void reject() override;
@@ -87,10 +97,17 @@ private slots:
     void showAbout();
     void showList();
 
+    void slotDeleteImage();
+    void slotFlipImage();
+    void slotRotateImageLeft();
+    void slotRotateImageRight();
+
 private:
+    void execOpOnSelected(ImageOperation op);
     void updateInfoText(ProcessStatus stat, const QString& saveFile = QString());
     void buildMenu(QToolButton *button);
     void startPdfCreation();
+    int getSelectedImageRow();
 
     const int _IndxListView {0};
     const int _IndxConfig {1};
@@ -106,7 +123,7 @@ private:
     QString _lastPath;
     QScopedPointer<QSettings> _settings;
     QScopedPointer<ImageListDelegate> _delegate;
-    Executor *_scanner {nullptr};
+    Executor *_executor {nullptr};
     QStringList _scans;
 };
 #endif // DIALOG_H

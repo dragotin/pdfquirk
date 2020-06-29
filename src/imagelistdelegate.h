@@ -19,9 +19,11 @@
 #define IMAGELISTDELEGATE_H
 
 #include <QStyledItemDelegate>
+#include <QMenu>
 
 class ImageListDelegate : public QStyledItemDelegate
 {
+    Q_OBJECT
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
     ImageListDelegate(QObject *parent = nullptr);
@@ -31,14 +33,29 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &  option ,
                    const QModelIndex &  index ) const override;
 
+signals:
+    void flipImage();
+    void deleteImage();
+    void rotateImageLeft();
+    void rotateImageRight();
+
 public slots:
     void slotThumbSize(const QSize& size);
 
 protected:
     void initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const override;
 
+    virtual bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
+                const QModelIndex& index ) override;
 private:
+    void showContextMenu(const QPoint& globalPos);
     QSize _size;
+    
+    QScopedPointer<QMenu> _menu;
+    QAction *_flipAct;
+    QAction *_deleteAct;
+    QAction *_rotateLeftAct;
+    QAction *_rotateRightAct;
 };
 
 #endif // IMAGELISTDELEGATE_H

@@ -22,6 +22,8 @@
 #include <QAbstractListModel>
 #include <QSize>
 
+#include "pdfquirkimage.h"
+
 class ImageModel : public QAbstractListModel
 {
 public:
@@ -29,9 +31,9 @@ public:
 
     QStringList files() const;
 
-    static QSize ImageSize() { return QSize(200, 282); }
+    int hasImages() { return _images.size() > 0; }
 
-    int hasImages() { return _pixmaps.size() > 0; }
+    PdfQuirkImage imageAt(int number);
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -49,12 +51,12 @@ public:
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
 public slots:
-    void addImageFile(const QString& file , int row = -1);
+    void addImageFile(const QString& file , int row = -1, bool ourFile = false);
+    void refreshImage(int row);
     void clear();
 
 private:
-    QList<QPixmap> _pixmaps;
-    QStringList _pathes;
+    QVector<PdfQuirkImage> _images;
 };
 
 #endif // IMAGEMODEL_H

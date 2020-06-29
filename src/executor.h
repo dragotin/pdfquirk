@@ -22,6 +22,7 @@
 #include <QProcess>
 
 class QProcess;
+class PdfQuirkImage;
 
 class Executor : public QObject
 {
@@ -36,7 +37,9 @@ public:
     void setOutputFile(const QString& fileName);
     QString outputFile();
 
-    void setCommand(const QString& cmd);
+    bool flipImage( const PdfQuirkImage& img);
+    bool rotate(const PdfQuirkImage& img, int degree);
+    bool removeImage( const PdfQuirkImage& img);
 
 public slots:
     void stop();
@@ -51,7 +54,6 @@ private slots:
 private:
     const QString OutfileTag {"%OUTFILE"};
     QString _outputFile;
-    QString _cmd;
     QProcess *_process {nullptr};
 };
 

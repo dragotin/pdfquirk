@@ -24,6 +24,7 @@
 #include<QMimeData>
 #include <QUrl>
 #include <QStandardItemModel>
+#include <QDir>
 
 ImageModel::ImageModel()
     :QAbstractListModel()
@@ -33,7 +34,12 @@ ImageModel::ImageModel()
 
 QStringList ImageModel::files() const
 {
-    return _pathes;
+    QStringList re;
+
+    for ( auto img : _images )
+        re.append(img.fileName());
+
+    return re;
 }
 
 Qt::DropActions ImageModel::supportedDropActions() const
@@ -81,7 +87,7 @@ bool ImageModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int 
     return true;
 }
 
-void ImageModel::addImageFile( const QString& file, int row )
+void ImageModel::addImageFile( const QString& file, int row, bool ourFile )
 {
     QFileInfo fi(file);
     if (!fi.exists()) {
@@ -92,11 +98,14 @@ void ImageModel::addImageFile( const QString& file, int row )
     pix.load(file);
 
     if (row == -1)
-        row = _pixmaps.size();
+        row = _images.size(); // append
+
+    PdfQuirkImage image;
+    image.setOurFile(ourFile);
+    image.setImageFile(file);
 
     beginInsertRows(QModelIndex(), row, row);
-    _pixmaps.insert(row, pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-    _pathes.insert(row, file);
+    _images.insert(row, image);
     endInsertRows();
 }
 
@@ -107,8 +116,8 @@ QVariant ImageModel::data(const QModelIndex &index, int role) const
         return var;
 
     if (role == Qt::DecorationRole) {
-        if (index.row() < _pixmaps.size()) {
-            return _pixmaps.at(index.row());
+        if (index.row() < _images.size()) {
+            return _images.at(index.row()).pixmap();
         }
     }
     if (role == Qt::DisplayRole) {
@@ -124,11 +133,32 @@ bool ImageModel::removeRows(int row, int count, const QModelIndex &parent)
         return false;
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; i++) {
-        _pixmaps.removeAt(row+i);
-        _pathes.removeAt(row+i);
+        _images.removeAt(row+i);
     }
     endRemoveRows();
     return true;
+}
+
+
+void ImageModel::refreshImage(int row)
+{
+    if (row < 0 || row > rowCount())
+        return;
+    PdfQuirkImage img = _images.at(row);
+
+    QFileInfo fi(img.fileName());
+
+    if (fi.exists()) {
+        // the image was changed.
+        img.setImageFile(img.fileName()); // refreshes the thumbnail
+
+        QModelIndex idx = index(row, 0, QModelIndex());
+        _images.replace(row, img);
+        emit dataChanged(idx, idx);
+    } else {
+        // the image was removed.
+        removeRows(row, 1, QModelIndex());
+    }
 }
 
 QStringList ImageModel::mimeTypes() const
@@ -156,7 +186,7 @@ QMimeData* ImageModel::mimeData(const QModelIndexList &indexes) const
     QList<QUrl> urls;
     for (auto idx : indexes) {
         int r = idx.row();
-        urls.append(QUrl::fromLocalFile(_pathes.at(r)));
+        urls.append(QUrl::fromLocalFile(_images.at(r).fileName()));
     }
 
     mimeData->setUrls(urls);
@@ -166,15 +196,33 @@ QMimeData* ImageModel::mimeData(const QModelIndexList &indexes) const
 int ImageModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    int rows = _pixmaps.size();
+    int rows = _images.size();
 
     return rows;
+}
+
+PdfQuirkImage ImageModel::imageAt(int number)
+{
+    if (number >= 0 && number < _images.size()) {
+        return _images.at(number);
+    }
+    return PdfQuirkImage();
 }
 
 void ImageModel::clear()
 {
     emit beginResetModel();
-    _pixmaps.clear();
-    _pathes.clear();
+    for (auto img : _images) {
+        if (img.isOurFile()) {
+            QFileInfo fi(img.fileName());
+            QDir d = fi.absoluteDir();
+            const QString fileStr = fi.absoluteFilePath();
+            QFile::remove(fileStr);
+            if (d.isEmpty()) {
+                d.removeRecursively();
+            }
+        }
+    }
+    _images.clear();
     emit endResetModel();
 }

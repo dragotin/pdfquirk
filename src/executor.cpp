@@ -16,6 +16,7 @@
 */
 
 #include "executor.h"
+#include "pdfquirkimage.h"
 
 #include <QObject>
 #include <QProcess>
@@ -85,7 +86,6 @@ Executor::~Executor()
             _process->kill();
             qDebug() << "KILLED the process!";
         }
-        delete _process;
     }
 }
 
@@ -97,11 +97,6 @@ QString Executor::outputFile()
 void Executor::setOutputFile(const QString& fileName)
 {
     _outputFile = fileName;
-}
-
-void Executor::setCommand(const QString& cmd)
-{
-    _cmd = cmd;
 }
 
 void Executor::stop()
@@ -158,12 +153,67 @@ bool Executor::scan(const QString& cmd)
     return result;
 }
 
+bool Executor::flipImage(const PdfQuirkImage& img)
+{
+    if (!img.isValid())
+        return false;
+
+    const QString newName = img.keepBackup();
+    bool re {false};
+    // flip the image from the new, hidden file to the original file
+    if (!newName.isEmpty()) {
+        QStringList args;
+        args << "-flip";
+        args << newName;
+        args << img.fileName();
+        if (QProcess::execute("convert", args) == 0)
+            re = true;
+    }
+    return re;
+}
+
+bool Executor::rotate(const PdfQuirkImage& img, int degree)
+{
+    if (!img.isValid() || degree == 0 || degree > 359)
+        return false;
+
+    const QString newName = img.keepBackup();
+    bool re {false};
+    // rotate the image from the new, hidden file to the original file
+    if (!newName.isEmpty()) {
+        QStringList args;
+        args << "-rotate";
+        args << QString::number(degree);
+        args << newName;
+        args << img.fileName();
+        if (QProcess::execute("convert", args) == 0)
+            re = true;
+    }
+    return re;
+}
+
+bool Executor::removeImage( const PdfQuirkImage& img)
+{
+    bool re{false};
+
+    if (img.isValid()) {
+        const QString backupName = img.keepBackup();
+        QFileInfo fi(img.fileName());
+
+        if (!backupName.isEmpty() && fi.isWritable()) {
+            re = QFile::remove(img.fileName());
+        }
+    }
+
+    return re;
+}
 
 void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     Q_UNUSED(exitStatus)
     if (_process) {
         qDebug() << "stderr output: " << _process->readAllStandardError();
+        _process->deleteLater();
     }
     emit finished(exitCode); // FIXME
 }

@@ -22,7 +22,6 @@
 #include <QProcess>
 #include <QTemporaryDir>
 #include <QDebug>
-#include <QRegExp>
 
 namespace {
 
@@ -35,7 +34,8 @@ namespace {
 QStringList parseStringArgs(const QString& cmd)
 {
     bool openSingle {false};
-    QStringList l = cmd.split(QRegExp(" +"));
+
+    QStringList l = cmd.split(" ", Qt::SkipEmptyParts);
     QStringList re;
     QString escaped;
     for (auto part : l) {

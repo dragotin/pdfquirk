@@ -213,7 +213,6 @@ void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
     Q_UNUSED(exitStatus)
     if (_process) {
         qDebug() << "stderr output: " << _process->readAllStandardError();
-        _process->deleteLater();
     }
     emit finished(exitCode); // FIXME
 }

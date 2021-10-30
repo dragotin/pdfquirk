@@ -1,2 +1,2 @@
-#define VERSION QStringLiteral("0.93")
+#define VERSION QStringLiteral("0.95")
 

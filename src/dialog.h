@@ -75,6 +75,7 @@ public:
         FlipImage,
         RotateLeft,
         RotateRight,
+        Deskew,
         Remove
     };
 
@@ -101,6 +102,7 @@ private slots:
     void slotFlipImage();
     void slotRotateImageLeft();
     void slotRotateImageRight();
+    void slotDeskewImage();
 
 private:
     void execOpOnSelected(ImageOperation op);

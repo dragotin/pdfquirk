@@ -38,6 +38,7 @@ signals:
     void deleteImage();
     void rotateImageLeft();
     void rotateImageRight();
+    void DeskewImage();
 
 public slots:
     void slotThumbSize(const QSize& size);
@@ -56,6 +57,7 @@ private:
     QAction *_deleteAct;
     QAction *_rotateLeftAct;
     QAction *_rotateRightAct;
+    QAction *_deskewAct;
 };
 
 #endif // IMAGELISTDELEGATE_H

@@ -111,6 +111,7 @@ Dialog::Dialog(QWidget *parent)
     connect( _delegate.data(), &ImageListDelegate::deleteImage, this, &Dialog::slotDeleteImage);
     connect( _delegate.data(), &ImageListDelegate::rotateImageLeft, this, &Dialog::slotRotateImageLeft);
     connect( _delegate.data(), &ImageListDelegate::rotateImageRight, this, &Dialog::slotRotateImageRight);
+    connect( _delegate.data(), &ImageListDelegate::DeskewImage, this, &Dialog::slotDeskewImage);
 
     QFont f = ui->listviewThumbs->font();
     QFontMetrics fm(f);
@@ -267,6 +268,8 @@ void Dialog::execOpOnSelected(ImageOperation op)
 
     if (image.isValid()) {
         bool result {false};
+        startLengthyOperation();
+
         if (op == ImageOperation::FlipImage) {
             qDebug() << "Flipping image" << image.fileName();
             result = _executor->flipImage(image);
@@ -274,13 +277,13 @@ void Dialog::execOpOnSelected(ImageOperation op)
             qDebug() << "Rotating image";
             result = _executor->rotate(image, op == ImageOperation::RotateLeft ? 270 : 90);
         } else if (op == ImageOperation::Remove) {
-            if (!image.isOurFile()) {
-                const QString text( tr("Do you want to remove image\n%1").arg(image.fileName()));
-                if (QMessageBox::StandardButton::Yes != QMessageBox::question(this, tr("Remove Image"), text)) {
-                    return; // do not remove image
-                }
+            const QString text( tr("Do you want to remove image\n%1").arg(image.fileName()));
+            if (QMessageBox::StandardButton::Yes != QMessageBox::question(this, tr("Remove Image"), text)) {
+                return; // do not remove image
             }
             result = _executor->removeImage(image);
+        } else if (op == ImageOperation::Deskew) {
+            result = _executor->deskewImage(image);
         }
 
         if (result) {
@@ -289,6 +292,7 @@ void Dialog::execOpOnSelected(ImageOperation op)
         } else {
             qDebug() << "Image operation failed!";
         }
+        endLengthyOperation();
     }
 }
 
@@ -311,6 +315,12 @@ void Dialog::slotRotateImageRight()
 {
     execOpOnSelected(ImageOperation::RotateRight);
 }
+
+void Dialog::slotDeskewImage()
+{
+    execOpOnSelected(ImageOperation::Deskew);
+}
+
 
 void Dialog::startPdfCreation()
 {
@@ -367,10 +377,17 @@ void Dialog::slotFromFile()
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files to PDF"), path, "Images (*.png *.jpeg *.jpg)");
 
     startLengthyOperation();
+
+    // These are all not our files. Copy as they are added.
     for (const QString& file : files) {
         QFileInfo fi(file);
         qApp->processEvents();
-        _model.addImageFile(file); // add a file but it is not ours
+
+        PdfQuirkImage image;
+        qDebug() << "Copying file" << file;
+        image.setImageFile(file, true); // copy and add.
+
+        _model.addImageFile(image); // add a file but it is not ours
 
         path = fi.path();
     }
@@ -478,7 +495,9 @@ void Dialog::slotScanFinished(int exitCode)
     }
     // exitCode 0 is success
     if (exitCode == 0 && !resultFile.isEmpty()) {
-        _model.addImageFile(resultFile, -1, true);
+        PdfQuirkImage img;
+        img.setImageFile(resultFile);
+        _model.addImageFile(img);
 
         if (_model.rowCount()) {
             updateInfoText(ProcessStatus::ImageScanned, resultFile);

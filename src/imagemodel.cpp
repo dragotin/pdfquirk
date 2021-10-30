@@ -82,29 +82,20 @@ bool ImageModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int 
 
     for (auto url : urls) {
         QModelIndex idx = index(userow++, 0, QModelIndex());
-        addImageFile(url.toLocalFile(), idx.row());
+        PdfQuirkImage img;
+        img.setImageFile(url.toLocalFile());
+        addImageFile(img, idx.row());
     }
     return true;
 }
 
-void ImageModel::addImageFile( const QString& file, int row, bool ourFile )
+void ImageModel::addImageFile(const PdfQuirkImage& image, int row)
 {
-    QFileInfo fi(file);
-    if (!fi.exists()) {
-        return;
-    }
-
-    QPixmap pix;
-    pix.load(file);
-
     if (row == -1)
         row = _images.size(); // append
 
-    PdfQuirkImage image;
-    image.setOurFile(ourFile);
-    image.setImageFile(file);
-
     beginInsertRows(QModelIndex(), row, row);
+
     _images.insert(row, image);
     endInsertRows();
 }
@@ -213,14 +204,12 @@ void ImageModel::clear()
 {
     emit beginResetModel();
     for (auto img : _images) {
-        if (img.isOurFile()) {
-            QFileInfo fi(img.fileName());
-            QDir d = fi.absoluteDir();
-            const QString fileStr = fi.absoluteFilePath();
-            QFile::remove(fileStr);
-            if (d.isEmpty()) {
-                d.removeRecursively();
-            }
+        QFileInfo fi(img.fileName());
+        QDir d = fi.absoluteDir();
+        const QString fileStr = fi.absoluteFilePath();
+        QFile::remove(fileStr);
+        if (d.isEmpty()) {
+            d.removeRecursively();
         }
     }
     _images.clear();

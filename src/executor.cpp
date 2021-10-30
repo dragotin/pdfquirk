@@ -158,7 +158,7 @@ bool Executor::flipImage(const PdfQuirkImage& img)
     if (!img.isValid())
         return false;
 
-    const QString newName = img.keepBackup();
+    const QString newName = img.createTempCopy();
     bool re {false};
     // flip the image from the new, hidden file to the original file
     if (!newName.isEmpty()) {
@@ -177,19 +177,45 @@ bool Executor::rotate(const PdfQuirkImage& img, int degree)
     if (!img.isValid() || degree == 0 || degree > 359)
         return false;
 
-    const QString newName = img.keepBackup();
+    const QString tmpFile = img.createTempCopy();
     bool re {false};
     // rotate the image from the new, hidden file to the original file
-    if (!newName.isEmpty()) {
+    if (!tmpFile.isEmpty()) {
         QStringList args;
         args << "-rotate";
         args << QString::number(degree);
-        args << newName;
+        args << tmpFile;
         args << img.fileName();
-        if (QProcess::execute("convert", args) == 0)
+        if (QProcess::execute("convert", args) == 0) {
             re = true;
+            QFile::remove(tmpFile);
+        }
     }
     return re;
+}
+
+bool Executor::deskewImage(PdfQuirkImage& img)
+{
+    if (!img.isValid())
+        return false;
+
+    const QString tmpFile = img.createTempCopy();
+    bool re {false};
+    // rotate the image from the new, hidden file to the original file
+    if (!tmpFile.isEmpty()) {
+        QStringList args;
+        args << "-o";
+        args << img.fileName();
+        args << "-b";
+        args << "FFFFFF"; // create a white background
+        args << tmpFile;
+        if (QProcess::execute("deskew", args) == 0) {
+            re = true;
+            QFile::remove(tmpFile);
+        }
+    }
+    return re;
+
 }
 
 bool Executor::removeImage( const PdfQuirkImage& img)
@@ -197,10 +223,9 @@ bool Executor::removeImage( const PdfQuirkImage& img)
     bool re{false};
 
     if (img.isValid()) {
-        const QString backupName = img.keepBackup();
         QFileInfo fi(img.fileName());
 
-        if (!backupName.isEmpty() && fi.isWritable()) {
+        if (!img.fileName().isEmpty() && fi.isWritable()) {
             re = QFile::remove(img.fileName());
         }
     }

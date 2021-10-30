@@ -51,7 +51,8 @@ public:
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
 public slots:
-    void addImageFile(const QString& file , int row = -1, bool ourFile = false);
+
+    void addImageFile(const PdfQuirkImage& image, int row = -1);
     void refreshImage(int row);
     void clear();
 

@@ -39,6 +39,7 @@ public:
 
     bool flipImage( const PdfQuirkImage& img);
     bool rotate(const PdfQuirkImage& img, int degree);
+    bool deskewImage(PdfQuirkImage &img);
     bool removeImage( const PdfQuirkImage& img);
 
 public slots:

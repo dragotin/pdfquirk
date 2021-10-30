@@ -24,23 +24,20 @@ class PdfQuirkImage
 {
 public:
     PdfQuirkImage();
-    void setImageFile(const QString& file);
+    void setImageFile(const QString& file, bool doCopy = false);
 
     static QSize ImageSize() { return QSize(200, 282); }
 
+    QString createTempCopy() const;
+
     QString fileName() const { return _file; }
     QPixmap pixmap() const { return _image; }
-    bool    isOurFile() const { return _ourfile; }
-    void    setOurFile(bool ours) { _ourfile = ours; }
     bool    isValid() const { return !_file.isEmpty(); }
-
-    QString keepBackup() const;
-    QString backupFile() const;
 
 private:
     QString _file;
+    QString _lastBackup;
     QPixmap _image;
-    bool    _ourfile;
 };
 
 #endif // PDFQUIRKIMAGE_H

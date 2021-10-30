@@ -22,25 +22,34 @@
 #include <QCryptographicHash>
 #include <QBuffer>
 #include <QDir>
+#include <QRandomGenerator>
 
 #include "pdfquirkimage.h"
 
-PdfQuirkImage::PdfQuirkImage()
-    :_ourfile {false}
-{
+namespace {
 
+QString getRandomString()
+{
+   const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+   const int randomStringLength = 12; // assuming you want random strings of 12 characters
+
+   QString randomString;
+   for(int i=0; i<randomStringLength; ++i)
+   {
+       quint32 value = QRandomGenerator::global()->generate();
+       int index = value % possibleCharacters.length();
+       QChar nextChar = possibleCharacters.at(index);
+       randomString.append(nextChar);
+   }
+   return randomString;
 }
 
-void PdfQuirkImage::setImageFile(const QString &file)
-{
-    const QPixmap pix(file);
-    _image = pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    _file = file;
-}
 
-QString PdfQuirkImage::backupFile() const
+QString copyFile(const QString& srcFile, const QString& targetFileName = QString())
 {
-    if (_file.isEmpty())
+    QString targetFN { targetFileName };
+
+    if (srcFile.isEmpty())
         return QString();
 
     QString targetDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -48,29 +57,56 @@ QString PdfQuirkImage::backupFile() const
     if (!tDir.exists()) {
         tDir.mkpath(targetDir);
     }
-    QCryptographicHash hash(QCryptographicHash::Sha1);
-    QBuffer f;
-    f.setData(_file.toUtf8());
-    hash.addData(&f);
-    const QString backupFile = tDir.absoluteFilePath(QString(hash.result().toHex()));
 
-    return backupFile;
-}
+    if (targetFN.isEmpty()) { // create a temporar file
+        targetFN = getRandomString();
+    }
 
-// copy the image to a secret place to be able to restore later.
-QString PdfQuirkImage::keepBackup() const
-{
+    QFileInfo fi(srcFile);
+    const QString backupFileName = QString("%1.%2").arg(targetFN).arg(fi.completeSuffix());
+    const QString backupFile = tDir.absoluteFilePath(backupFileName);
+
     QString resultingFile;
-    const QString backup = backupFile();
-    QFileInfo tdFi(backup);
-    if (!backup.isEmpty() ){
+
+    if (!backupFile.isEmpty() ){
+        QFileInfo tdFi(backupFile);
+
         if (tdFi.exists() && tdFi.isWritable()) {
-            QFile::remove(backup);
+            QFile::remove(backupFile);
         }
-        if (QFile::copy(_file, backup)) {
-            resultingFile = backup;
+        if (QFile::copy(srcFile, backupFile)) {
+            resultingFile = backupFile;
         }
     }
 
     return resultingFile;
 }
+
+} // --- end namespace ---
+
+PdfQuirkImage::PdfQuirkImage()
+{
+
+}
+
+QString PdfQuirkImage::createTempCopy() const
+{
+    const QString f= copyFile(_file);
+
+    return f;
+}
+
+void PdfQuirkImage::setImageFile(const QString &file, bool doCopy)
+{
+    _file = file;
+    if (doCopy) {
+        const QByteArray ba = QCryptographicHash::hash(file.toUtf8(),QCryptographicHash::Sha1).toHex();
+        // create a copy of the file. Use the SHA1 of the filename as name.
+        qDebug() << "Copying to" << ba;
+        _file = copyFile(_file, ba);
+    }
+
+    const QPixmap pix(_file);
+    _image = pix.scaled(ImageSize(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
+

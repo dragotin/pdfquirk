@@ -42,10 +42,15 @@ ImageListDelegate::ImageListDelegate(QObject *parent)
     _rotateRightAct = new QAction(QIcon::fromTheme("object-flip-vertical-symbolic"), tr("Rotate image right"), parent);
     // _flipAct->setShortcuts(QKeySequence::F);
     connect(_rotateRightAct, &QAction::triggered, this, &ImageListDelegate::rotateImageRight);
+    _deskewAct = new QAction(QIcon::fromTheme("object-flip-vertical-symbolic"), tr("Deskew image"), parent);
+    // _flipAct->setShortcuts(QKeySequence::F);
+    connect(_deskewAct, &QAction::triggered, this, &ImageListDelegate::DeskewImage);
 
+    _menu->addSection(tr("ImageActions"));
     _menu->addAction(_flipAct);
     _menu->addAction(_rotateLeftAct);
     _menu->addAction(_rotateRightAct);
+    _menu->addAction(_deskewAct);
     _menu->addAction(_deleteAct);
 }
 

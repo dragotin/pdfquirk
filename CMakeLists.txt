@@ -17,7 +17,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 COMPONENTS Widgets REQUIRED)
+endif()
 
 add_subdirectory(src)
 

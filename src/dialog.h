@@ -126,6 +126,5 @@ private:
     QScopedPointer<QSettings> _settings;
     QScopedPointer<ImageListDelegate> _delegate;
     Executor *_executor {nullptr};
-    QStringList _scans;
 };
 #endif // DIALOG_H

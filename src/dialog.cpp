@@ -352,16 +352,6 @@ void Dialog::pdfCreatorFinished(int success)
 
     if (success == 0) {
         // cleanup: remove the scanned pages
-        for (auto file : _scans) {
-            QFileInfo fi(file);
-            QDir d = fi.absoluteDir();
-            const QString fileStr = fi.absoluteFilePath();
-            QFile::remove(fileStr);
-            if (d.isEmpty()) {
-                d.removeRecursively();
-            }
-        }
-        _scans.clear();
         _model.clear();
         updateInfoText(ProcessStatus::PDFCreated, resultFile);
     } else {
@@ -501,9 +491,6 @@ void Dialog::slotScanFinished(int exitCode)
 
         if (_model.rowCount()) {
             updateInfoText(ProcessStatus::ImageScanned, resultFile);
-
-            // remember the scanned file.
-            _scans.append(resultFile);
         }
 
     } else {
@@ -531,6 +518,7 @@ void Dialog::endLengthyOperation()
 
 Dialog::~Dialog()
 {
+    _model.clear();
     delete ui;
 }
 

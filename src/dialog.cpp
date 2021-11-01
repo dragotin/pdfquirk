@@ -268,7 +268,6 @@ void Dialog::execOpOnSelected(ImageOperation op)
 
     if (image.isValid()) {
         bool result {false};
-        startLengthyOperation();
 
         if (op == ImageOperation::FlipImage) {
             qDebug() << "Flipping image" << image.fileName();
@@ -277,13 +276,14 @@ void Dialog::execOpOnSelected(ImageOperation op)
             qDebug() << "Rotating image";
             result = _executor->rotate(image, op == ImageOperation::RotateLeft ? 270 : 90);
         } else if (op == ImageOperation::Remove) {
-            const QString text( tr("Do you want to remove image\n%1").arg(image.fileName()));
-            if (QMessageBox::StandardButton::Yes != QMessageBox::question(this, tr("Remove Image"), text)) {
-                return; // do not remove image
+            const QString text( tr("Do you want to remove the selected image\n"));
+            if (QMessageBox::StandardButton::Yes == QMessageBox::question(this, tr("Remove Image"), text)) {
+                result = _executor->removeImage(image);
             }
-            result = _executor->removeImage(image);
         } else if (op == ImageOperation::Deskew) {
+            startLengthyOperation();
             result = _executor->deskewImage(image);
+            endLengthyOperation();
         }
 
         if (result) {
@@ -292,7 +292,6 @@ void Dialog::execOpOnSelected(ImageOperation op)
         } else {
             qDebug() << "Image operation failed!";
         }
-        endLengthyOperation();
     }
 }
 

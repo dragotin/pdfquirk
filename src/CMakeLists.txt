@@ -15,7 +15,13 @@ add_executable(pdfquirk
     ../resources/pdfquirk.qrc
 )
 
-target_link_libraries(pdfquirk PRIVATE Qt::Widgets Qt::Core)
+if(Qt6_Found)
+    target_link_libraries(pdfquirk PRIVATE Qt6::Widgets)
+    message ("Linking against Qt6!")
+else(Qt6_Found)
+    target_link_libraries(pdfquirk PRIVATE Qt5::Widgets)
+    message ("Linking against Qt5!")
+endif(Qt6_Found)
 
 install(TARGETS pdfquirk RUNTIME DESTINATION bin)
 

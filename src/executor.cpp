@@ -35,7 +35,7 @@ QStringList parseStringArgs(const QString& cmd)
 {
     bool openSingle {false};
 
-    QStringList l = cmd.split(" ", Qt::SkipEmptyParts);
+    QStringList l = cmd.split(" ", QString::SkipEmptyParts);
     QStringList re;
     QString escaped;
     for (auto part : l) {

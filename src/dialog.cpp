@@ -24,7 +24,7 @@
 #include <QEventLoop>
 #include <QDialogButtonBox>
 #include <QSettings>
-#include <QDir>
+#include <QDate>
 #include <QObject>
 #include <QResizeEvent>
 #include <QDebug>
@@ -43,16 +43,18 @@ namespace {
 
 QString aboutText()
 {
+    const QDate d = QDate::currentDate();
+
     return QObject::tr( "<h2>About PDF Quirk %1</h2>"
                "<p>PDF Quirk is a simple app to easily create PDFs from scans or images.</p>"
                "<p></p>"
                "<p>It is free software released "
                "under the <a href=\"https://www.gnu.org/licenses/gpl-3.0.de.html\">"
                "Gnu General Public License version 3</a>.</p>"
-               "<p>Copyright 2020 Klaas Freitag &lt;kraft@freisturz.de&gt;,&nbsp;"
+               "<p>Copyright %2 Klaas Freitag &lt;kraft@freisturz.de&gt;,&nbsp;"
                "<a href=\"https://dragotin.github.io/quirksite/\">https://dragotin.github.io/quirksite/</a>.</p>"
                "Contributions are welcome, find the <a href=\"https://github.com/dragotin/pdfquirk\">sources here</a>"
-               " or <a href=\"https://github.com/dragotin/pdfquirk/issues\">report bugs</a>.</p>").arg(VERSION);
+               " or <a href=\"https://github.com/dragotin/pdfquirk/issues\">report bugs</a>.</p>").arg(VERSION).arg(d.year());
 }
 
 } // end namespace

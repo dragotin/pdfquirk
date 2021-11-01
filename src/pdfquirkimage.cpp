@@ -22,6 +22,7 @@
 #include <QCryptographicHash>
 #include <QBuffer>
 #include <QDir>
+#include <QDebug>
 #include <QRandomGenerator>
 
 #include "pdfquirkimage.h"

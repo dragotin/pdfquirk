@@ -13,107 +13,22 @@
   <property name="windowTitle">
    <string>PDF Quirk</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="../resources/pdfquirk.qrc">:/resources/logo2_200x200.png</pixmap>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <pointsize>16</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Convert Images to PDF</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="menuButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/pdfquirk.qrc">
-         <normaloff>:/resources/menu-red-16.png</normaloff>:/resources/menu-red-16.png</iconset>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
+  <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Add Pages from</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
     <widget class="QStackedWidget" name="widgetStack">
      <property name="currentIndex">
       <number>0</number>
      </property>
      <widget class="QWidget" name="listViewPage">
-      <layout class="QGridLayout" name="gridLayout_3">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="1" column="0">
-        <widget class="QListView" name="listviewThumbs">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="dragEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectColumns</enum>
-         </property>
-         <property name="flow">
-          <enum>QListView::LeftToRight</enum>
-         </property>
-         <property name="viewMode">
-          <enum>QListView::ListMode</enum>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Add Pages from</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QTabWidget" name="tabWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -155,7 +70,7 @@
           <attribute name="title">
            <string>Scanner</string>
           </attribute>
-          <layout class="QGridLayout" name="gridLayout_2">
+          <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="0">
             <spacer name="horizontalSpacer">
              <property name="orientation">
@@ -163,18 +78,11 @@
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>88</width>
+               <width>416</width>
                <height>31</height>
               </size>
              </property>
             </spacer>
-           </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="pbAddFromScanner">
-             <property name="text">
-              <string>Start Single Scan</string>
-             </property>
-            </widget>
            </item>
            <item row="0" column="1">
             <widget class="QCheckBox" name="cbColorScan">
@@ -183,8 +91,37 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pbAddFromScanner">
+             <property name="text">
+              <string>Start Single Scan</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QListView" name="listviewThumbs">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectColumns</enum>
+         </property>
+         <property name="flow">
+          <enum>QListView::LeftToRight</enum>
+         </property>
+         <property name="viewMode">
+          <enum>QListView::ListMode</enum>
+         </property>
         </widget>
        </item>
       </layout>
@@ -255,14 +192,7 @@
      </widget>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="labInfo">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
+   <item row="3" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -277,6 +207,64 @@
       <set>QDialogButtonBox::Close|QDialogButtonBox::Save</set>
      </property>
     </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labInfo">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../resources/pdfquirk.qrc">:/resources/logo2_200x200.png</pixmap>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Convert Images to PDF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="menuButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/pdfquirk.qrc">
+         <normaloff>:/resources/menu-red-16.png</normaloff>:/resources/menu-red-16.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

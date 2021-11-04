@@ -34,8 +34,11 @@ namespace {
 QStringList parseStringArgs(const QString& cmd)
 {
     bool openSingle {false};
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QStringList l = cmd.split(" ", QString::SkipEmptyParts);
+#else
+    QStringList l = cmd.split(" ", Qt::SkipEmptyParts);
+#endif
     QStringList re;
     QString escaped;
     for (auto part : l) {

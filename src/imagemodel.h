@@ -26,6 +26,7 @@
 
 class ImageModel : public QAbstractListModel
 {
+    Q_OBJECT
 public:
     ImageModel();
 

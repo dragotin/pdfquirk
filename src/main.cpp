@@ -18,13 +18,21 @@
 #include "dialog.h"
 
 #include <QApplication>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
     a.setApplicationName("pdfquirk");
     a.setOrganizationDomain("");
     a.setApplicationDisplayName("PDF Quirk");
+
+    QTranslator translator;
+    const QString qmFile { QString(":/i18n/%1_%2.qm").arg(a.applicationName()).arg(QLocale().name()) };
+    if (translator.load(qmFile)) {
+         QCoreApplication::installTranslator(&translator);
+    }
 
     Dialog w;
     w.show();

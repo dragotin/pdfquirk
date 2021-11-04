@@ -1,4 +1,5 @@
 
+
 add_executable(pdfquirk
     main.cpp
     dialog.cpp
@@ -15,6 +16,8 @@ add_executable(pdfquirk
     ../resources/pdfquirk.qrc
 )
 
+qt6_add_translations(pdfquirk TS_FILES  pdfquirk_de.ts)
+
 if(Qt6_Found)
     target_link_libraries(pdfquirk PRIVATE Qt6::Widgets)
     message ("Linking against Qt6!")
@@ -24,4 +27,3 @@ else(Qt6_Found)
 endif(Qt6_Found)
 
 install(TARGETS pdfquirk RUNTIME DESTINATION bin)
-

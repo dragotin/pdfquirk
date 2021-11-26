@@ -19,7 +19,6 @@
 #define DIALOG_H
 
 #include <QDialog>
-#include <QSettings>
 
 #include "imagemodel.h"
 
@@ -32,6 +31,7 @@ class QToolButton;
 
 class ImageListDelegate;
 class Executor;
+class Settings;
 
 class SizeCatcher : public QObject
 {
@@ -117,13 +117,9 @@ private:
 
     Ui::Dialog *ui;
 
-    const QString _SettingsLastFilePath {"lastFilePath"};
-    const QString _SettingsScanMono{"scanCmdMonochrome"};
-    const QString _SettingsScanColor{"scanCmdColor"};
-
     ImageModel _model;
     QString _lastPath;
-    QScopedPointer<QSettings> _settings;
+    Settings *_settings;
     QScopedPointer<ImageListDelegate> _delegate;
     Executor *_executor {nullptr};
 };

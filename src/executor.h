@@ -21,6 +21,8 @@
 #include <QObject>
 #include <QProcess>
 
+#include <settings.h>
+
 class QProcess;
 class PdfQuirkImage;
 
@@ -31,7 +33,7 @@ public:
     explicit Executor(QObject *parent = nullptr);
     ~Executor();
 
-    void buildPdf(const QStringList& files);
+    void buildPdf(const QStringList& files, const Settings &settings);
     bool scan(const QString &cmd);
 
     void setOutputFile(const QString& fileName);

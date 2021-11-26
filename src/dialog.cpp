@@ -16,7 +16,7 @@
 */
 
 #include "dialog.h"
-#include "./ui_dialog.h"
+#include "ui_dialog.h"
 
 #include <QFileDialog>
 #include <QDir>
@@ -26,6 +26,7 @@
 #include <QSettings>
 #include <QDate>
 #include <QObject>
+#include <QComboBox>
 #include <QResizeEvent>
 #include <QDebug>
 #include <QtGlobal>
@@ -37,7 +38,11 @@
 #include "imagelistdelegate.h"
 #include "executor.h"
 #include "pdfquirkimage.h"
+#include "settings.h"
 #include "version.h"
+
+#define QL(X) QStringLiteral(X)
+
 
 namespace {
 
@@ -45,14 +50,14 @@ QString aboutText()
 {
     const QDate d = QDate::currentDate();
 
-    return QObject::tr( "<h2>About PDF Quirk %1</h2>"
+    return QObject::tr( "<h2>About PDF Quirk version %1</h2>"
                "<p>PDF Quirk is a simple app to easily create PDFs from scans or images.</p>"
                "<p></p>"
                "<p>It is free software released "
                "under the <a href=\"https://www.gnu.org/licenses/gpl-3.0.de.html\">"
                "Gnu General Public License version 3</a>.</p>"
-               "<p>Copyright %2 Klaas Freitag &lt;kraft@freisturz.de&gt;,&nbsp;"
-               "<a href=\"https://dragotin.github.io/quirksite/\">https://dragotin.github.io/quirksite/</a>.</p>"
+               "<p>Copyright %2 Klaas Freitag &lt;kraft@freisturz.de&gt;</p>"
+               "<p>Website and help: <a href=\"https://dragotin.github.io/quirksite/\">https://dragotin.github.io/quirksite/</a>.</p>"
                "Contributions are welcome, find the <a href=\"https://github.com/dragotin/pdfquirk\">sources here</a>"
                " or <a href=\"https://github.com/dragotin/pdfquirk/issues\">report bugs</a>.</p>").arg(VERSION).arg(d.year());
 }
@@ -85,8 +90,7 @@ Dialog::Dialog(QWidget *parent)
     , ui(new Ui::Dialog)
 {
     // Prepare a settings file
-    const QString configHome { QString("%1/.config/pdfquirkrc").arg(QDir::homePath()) };
-    _settings.reset(new QSettings(configHome, QSettings::IniFormat));
+    _settings = new Settings(this);
 
     // Thumbnail sizes
     int thumbWidth = 100;
@@ -136,6 +140,30 @@ Dialog::Dialog(QWidget *parent)
     updateInfoText(ProcessStatus::JustStarted);
     buildMenu(ui->menuButton);
 
+    // Fill the combos in the config page
+    const QStringList sizes = (QStringList()<< QL("A0       841mmx1189mm")
+                               << QL("A1       594mmx841mm")
+                               << QL("A2       420mmx594mm")
+                               << QL("A3       297mmx420mm")
+                               << _settings->SettingsPaperSizeDefault
+                               << QL("A5       148mmx210mm")
+                               << QL("A6       105mmx148mm")
+                               << QL("Legal    8.5inx14in")
+                               << QL("Letter   8.5inx11in")
+                               << QL("Tabloid  11inx17in"));
+    ui->_pageSizeCombo->addItems(sizes);
+    const QString currSize = _settings->value(_settings->SettingsPaperSize, _settings->SettingsPaperSizeDefault).toString();
+    ui->_pageSizeCombo->setCurrentText(currSize);
+
+    const QStringList orient = (QStringList()<< _settings->SettingsPaperOrientationDefault << QL("Landscape"));
+    ui->_pageOrientationCombo->addItems(orient);
+    const QString currOrient = _settings->value(_settings->SettingsPaperOrient, _settings->SettingsPaperOrientationDefault).toString();
+    ui->_pageOrientationCombo->setCurrentText(currOrient);
+
+    const QString currMargin = _settings->value(_settings->SettingsPageMargin, _settings->SettingsPageMarginDefault).toString();
+    ui->_borderWidthLE->setInputMask("99 Millimeter");
+    ui->_borderWidthLE->setText(currMargin);
+
     ui->widgetStack->setCurrentIndex(_IndxListView);
 
     ui->labAbout->setText( aboutText() );
@@ -159,8 +187,8 @@ void Dialog::buildMenu(QToolButton *button)
 void Dialog::showConfiguration()
 {
     const QString defltCmd;
-    const QString colorCmd = _settings->value(_SettingsScanColor, defltCmd).toString();
-    const QString monoCmd = _settings->value(_SettingsScanMono, defltCmd).toString();
+    const QString colorCmd = _settings->value(_settings->SettingsScanColor, defltCmd).toString();
+    const QString monoCmd = _settings->value(_settings->SettingsScanMono, defltCmd).toString();
 
     ui->leMonoScanCmd->setText(monoCmd);
     ui->leColorScanCmd->setText(colorCmd);
@@ -210,16 +238,26 @@ void Dialog::slotButtonClicked(QAbstractButton *button)
         } else if (currIndx == _IndxConfig) {
             const QString colorCmd = ui->leColorScanCmd->text();
             if (colorCmd.isEmpty()) {
-                _settings->remove(_SettingsScanColor);
+                _settings->remove(_settings->SettingsScanColor);
             } else {
-                _settings->setValue(_SettingsScanColor, colorCmd);
+                _settings->setValue(_settings->SettingsScanColor, colorCmd);
             }
             const QString monoCmd = ui->leMonoScanCmd->text();
             if (monoCmd.isEmpty()) {
-                _settings->remove(_SettingsScanMono);
+                _settings->remove(_settings->SettingsScanMono);
             } else {
-                _settings->setValue(_SettingsScanMono, monoCmd);
+                _settings->setValue(_settings->SettingsScanMono, monoCmd);
             }
+
+            // the Pdf Options
+            const auto orientation = ui->_pageOrientationCombo->currentText();
+            _settings->setValue(_settings->SettingsPaperOrient, orientation);
+
+            const auto paperSize = ui->_pageSizeCombo->currentText();
+            _settings->setValue(_settings->SettingsPaperSize, paperSize);
+
+            const auto margin = ui->_borderWidthLE->text();
+            _settings->setValue(_settings->SettingsPageMargin, margin);
 
             showList();
         }
@@ -326,7 +364,7 @@ void Dialog::slotDeskewImage()
 void Dialog::startPdfCreation()
 {
     const QStringList files = _model.files();
-    const QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
+    const QString path = _settings->value(_settings->SettingsLastFilePath, QDir::homePath()).toString();
 
     const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
     if (!saveFile.isEmpty()) {
@@ -335,7 +373,7 @@ void Dialog::startPdfCreation()
         creator->setOutputFile(saveFile);
         startLengthyOperation();
         updateInfoText(ProcessStatus::CreatingPdf);
-        creator->buildPdf(files);
+        creator->buildPdf(files, *_settings );
     }
 }
 
@@ -363,7 +401,7 @@ void Dialog::pdfCreatorFinished(int success)
 
 void Dialog::slotFromFile()
 {
-    QString path = _settings->value(_SettingsLastFilePath, QDir::homePath()).toString();
+    QString path = _settings->value(_settings->SettingsLastFilePath, QDir::homePath()).toString();
 
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files to PDF"), path, "Images (*.png *.jpeg *.jpg)");
 
@@ -384,7 +422,7 @@ void Dialog::slotFromFile()
     }
     endLengthyOperation();
     updateInfoText(ProcessStatus::ImageLoaded);
-    _settings->setValue(_SettingsLastFilePath, path);
+    _settings->setValue(_settings->SettingsLastFilePath, path);
     _settings->sync();
 }
 
@@ -394,6 +432,7 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
 
     QString str;
     bool openExternal {false};
+
     switch(stat) {
     case ProcessStatus::Unknown:
         str = QString();
@@ -403,7 +442,7 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
         break;
     case ProcessStatus::ImageScanned:
         str = tr("%1 image(s) scanned. Press Save to create the PDF.").arg(numPages);
-        break;
+         break;
     case ProcessStatus::ImageLoaded:
         str = tr("%1 image(s) loaded. Press Save to create the PDF.").arg(numPages);
         break;
@@ -437,6 +476,7 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
     ui->labInfo->setOpenExternalLinks(openExternal);
     ui->labInfo->setText(str);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled( _model.rowCount() > 0 );
+
 }
 
 
@@ -449,9 +489,9 @@ void Dialog::slotFromScanner()
 
     bool color = ui->cbColorScan->isChecked();
     if (color)
-        scanCmd = _settings->value(_SettingsScanColor, defltCmd ).toString();
+        scanCmd = _settings->value(_settings->SettingsScanColor, defltCmd ).toString();
     else
-        scanCmd = _settings->value(_SettingsScanMono, defltCmd ).toString();
+        scanCmd = _settings->value(_settings->SettingsScanMono, defltCmd ).toString();
 
     if (scanCmd == defltCmd) {
         updateInfoText(ProcessStatus::NotConfigured);

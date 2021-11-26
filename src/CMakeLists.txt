@@ -7,6 +7,8 @@ add_executable(pdfquirk
     imagemodel.h
     imagelistdelegate.cpp
     pdfquirkimage.cpp
+    settings.cpp
+    settings.h
     imagelistdelegate.h
     executor.cpp
     executor.h

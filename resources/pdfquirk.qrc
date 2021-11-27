@@ -4,4 +4,8 @@
     <file>menu.svg</file>
     <file>menu-red-16.png</file>
   </qresource>
+
+  <qresource prefix="i18n/">
+    <file>pdfquirk_de.qm</file>
+  </qresource>
 </RCC>

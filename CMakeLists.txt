@@ -6,6 +6,7 @@ option(USE_QT6 "Enable this if you want to use Qt6, instead of Qt5" no)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(ECM REQUIRED NO_MODULE)
+
 list(APPEND CMAKE_MODULE_PATH "${ECM_MODULE_PATH}")
 
 include(ECMInstallIcons)
@@ -23,7 +24,7 @@ if(USE_QT6)
     find_package(Qt6 COMPONENTS Widgets Linguist REQUIRED)
     set(Qt6_Found "Qt6 found flag" CACHE INTERNAL yes)
 else(USE_QT6)
-    find_package(Qt5 COMPONENTS Widgets REQUIRED)
+    find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 endif(USE_QT6)
 
 add_subdirectory(src)

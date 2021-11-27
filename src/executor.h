@@ -44,15 +44,18 @@ public:
     bool deskewImage(PdfQuirkImage &img);
     bool removeImage( const PdfQuirkImage& img);
 
+    const static int NotFoundExitCode {255};
+
 public slots:
     void stop();
 
 signals:
-    void finished(bool);
+    void finished(int);
     void error(const QString&);
 
 private slots:
     void slotFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void slotErrorOccurred(QProcess::ProcessError error);
 
 private:
     const QString OutfileTag {"%OUTFILE"};

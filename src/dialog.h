@@ -68,7 +68,8 @@ public:
         ConfigPage,
         AboutPage,
         NotConfigured,
-        PDFCreatedFailed
+        PDFCreatedFailed,
+        ExtToolNotInstalled
     };
 
     enum class ImageOperation {

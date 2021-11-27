@@ -383,16 +383,18 @@ void Dialog::pdfCreatorFinished(int success)
 
     // get the result file name from the creator object.
     QString resultFile;
-    Executor *creator = static_cast<Executor*>(sender());
-    if (creator) {
-        resultFile = creator->outputFile();
-        creator->deleteLater();
-    }
-
     if (success == 0) {
+        Executor *creator = static_cast<Executor*>(sender());
+        if (creator) {
+            resultFile = creator->outputFile();
+            creator->deleteLater();
+        }
+
         // cleanup: remove the scanned pages
         _model.clear();
         updateInfoText(ProcessStatus::PDFCreated, resultFile);
+    } else if (success == Executor::NotFoundExitCode) {
+        updateInfoText(ProcessStatus::ExtToolNotInstalled);
     } else {
         updateInfoText(ProcessStatus::PDFCreatedFailed);
     }
@@ -471,6 +473,9 @@ void Dialog::updateInfoText(ProcessStatus stat, const QString& saveFile)
     case ProcessStatus::PDFCreatedFailed:
         str = tr("The PDF could not be created.");
         break;
+    case ProcessStatus::ExtToolNotInstalled:
+        str = tr("The external tool can not be started. Check installation.");
+        break;
     }
 
     ui->labInfo->setOpenExternalLinks(openExternal);
@@ -534,6 +539,8 @@ void Dialog::slotScanFinished(int exitCode)
             updateInfoText(ProcessStatus::ImageScanned, resultFile);
         }
 
+    } else if (exitCode == Executor::NotFoundExitCode) {
+        updateInfoText(ProcessStatus::ExtToolNotInstalled);
     } else {
         updateInfoText(ProcessStatus::ScanFailed);
     }

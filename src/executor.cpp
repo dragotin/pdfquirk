@@ -142,12 +142,14 @@ void Executor::buildPdf(const QStringList& files, const Settings& settings)
             QString m = margin.split(" ").at(0);
             m.append("mm");
             args.append(m);
+            args.append("--without-pdfrw");
             args.append(files);
         }
 
         _process = new QProcess;
         connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, &Executor::slotFinished);
+        connect(_process, &QProcess::errorOccurred, this, &Executor::slotErrorOccurred);
 
         _process->start(toolToUse, args);
     } else {
@@ -176,12 +178,31 @@ bool Executor::scan(const QString& cmd)
         const QString bin = args.takeFirst();
         connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, &Executor::slotFinished);
+        connect(_process, &QProcess::errorOccurred, this, &Executor::slotErrorOccurred);
 
         qDebug() << "Starting" << bin << args;
         _process->start(bin, args);
         result = true;
     }
     return result;
+}
+
+void Executor::slotErrorOccurred(QProcess::ProcessError error)
+{
+    int exitCode = 1; // general error
+    if (error == QProcess::FailedToStart) {
+        exitCode = NotFoundExitCode;
+    }
+    slotFinished(exitCode, QProcess::CrashExit);
+}
+
+void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    Q_UNUSED(exitStatus)
+    if (_process) {
+        qDebug() << "stderr output: " << _process->readAllStandardError();
+    }
+    emit finished(exitCode);
 }
 
 bool Executor::flipImage(const PdfQuirkImage& img)
@@ -264,14 +285,7 @@ bool Executor::removeImage( const PdfQuirkImage& img)
     return re;
 }
 
-void Executor::slotFinished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    Q_UNUSED(exitStatus)
-    if (_process) {
-        qDebug() << "stderr output: " << _process->readAllStandardError();
-    }
-    emit finished(exitCode); // FIXME
-}
+
 
 
 

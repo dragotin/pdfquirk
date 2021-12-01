@@ -142,7 +142,6 @@ void Executor::buildPdf(const QStringList& files, const Settings& settings)
             QString m = margin.split(" ").at(0);
             m.append("mm");
             args.append(m);
-            args.append("--without-pdfrw");
             args.append(files);
         }
 

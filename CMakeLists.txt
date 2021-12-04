@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 if(USE_QT6)
-    find_package(Qt6 COMPONENTS Widgets Linguist REQUIRED)
+    find_package(Qt6 COMPONENTS Widgets LinguistTools REQUIRED)
     set(Qt6_Found "Qt6 found flag" CACHE INTERNAL yes)
 else(USE_QT6)
     find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)

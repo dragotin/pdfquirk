@@ -19,6 +19,7 @@
 
 #include <QApplication>
 #include <QTranslator>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +30,9 @@ int main(int argc, char *argv[])
     a.setApplicationDisplayName("PDF Quirk");
 
     QTranslator translator;
-    const QString qmFile { QString(":/i18n/%1_%2.qm").arg(a.applicationName()).arg(QLocale().name()) };
+    const QString locale = QLocale().bcp47Name();
+    qDebug() << "Starting application" << a.applicationName();
+    const QString qmFile { QString(":/i18n/%1_%2.qm").arg(a.applicationName()).arg(locale) };
     if (translator.load(qmFile)) {
          QCoreApplication::installTranslator(&translator);
     }

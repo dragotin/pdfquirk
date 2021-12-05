@@ -19,7 +19,7 @@ add_executable(pdfquirk
     ${SOURCES} ../resources/pdfquirk.qrc
 )
 
-set ( Translations ../resources/pdfquirk_de.ts )
+set ( Translations ../resources/pdfquirk_de.ts ../resources/pdfquirk_es.ts)
 set_source_files_properties(${Translations} PROPERTIES OUTPUT_LOCATION
 ${CMAKE_SOURCE_DIR}/resources)
 

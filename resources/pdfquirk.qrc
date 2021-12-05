@@ -7,5 +7,6 @@
 
   <qresource prefix="i18n/">
     <file>pdfquirk_de.qm</file>
+    <file>pdfquirk_es.qm</file>
   </qresource>
 </RCC>

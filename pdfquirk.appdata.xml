@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-	<id>pdfquirk</id>
+	<id>de.volle-kraft-voraus.pdfquirk</id>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-2.0+</project_license>
 	<name>PDF Quirk</name>
@@ -10,7 +10,7 @@
 
 It is a really easy to use application for the desktop, useful for everybody who has a scanner or MFD printer.</p>
 	</description>
-	<launchable type="desktop-id">pdfquirk.desktop</launchable>
+	<launchable type="desktop-id">de.volle-kraft-voraus.pdfquirk.desktop</launchable>
 	<url type="homepage">https://dragotin.github.io/quirksite/</url>
 	<screenshots>
 		<screenshot type="default">

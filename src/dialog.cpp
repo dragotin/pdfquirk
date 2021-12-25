@@ -308,21 +308,21 @@ void Dialog::execOpOnSelected(ImageOperation op)
 
     if (image.isValid()) {
         bool result {false};
-
+        Executor executor;
         if (op == ImageOperation::FlipImage) {
             qDebug() << "Flipping image" << image.fileName();
-            result = _executor->flipImage(image);
+            result = executor.flipImage(image);
         } else if (op == ImageOperation::RotateLeft || op == ImageOperation::RotateRight) {
             qDebug() << "Rotating image";
-            result = _executor->rotate(image, op == ImageOperation::RotateLeft ? 270 : 90);
+            result = executor.rotate(image, op == ImageOperation::RotateLeft ? 270 : 90);
         } else if (op == ImageOperation::Remove) {
             const QString text( tr("Do you want to remove the selected image\n"));
             if (QMessageBox::StandardButton::Yes == QMessageBox::question(this, tr("Remove Image"), text)) {
-                result = _executor->removeImage(image);
+                result = executor.removeImage(image);
             }
         } else if (op == ImageOperation::Deskew) {
             startLengthyOperation();
-            result = _executor->deskewImage(image);
+            result = executor.deskewImage(image);
             endLengthyOperation();
         }
 
@@ -368,27 +368,25 @@ void Dialog::startPdfCreation()
 
     const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
     if (!saveFile.isEmpty()) {
-        Executor *creator = new Executor;
-        connect(creator, &Executor::finished, this, &Dialog::pdfCreatorFinished);
-        creator->setOutputFile(saveFile);
+        Q_ASSERT(_executor == nullptr);
+
+        _executor = new Executor;
+        connect(_executor, &Executor::finished, this, &Dialog::pdfCreatorFinished);
+        _executor->setOutputFile(saveFile);
         startLengthyOperation();
         updateInfoText(ProcessStatus::CreatingPdf);
-        creator->buildPdf(files, *_settings );
+        _executor->buildPdf(files, *_settings );
     }
 }
 
 void Dialog::pdfCreatorFinished(int success)
 {
     QApplication::restoreOverrideCursor();
-
+    Q_ASSERT(_executor);
     // get the result file name from the creator object.
     QString resultFile;
     if (success == 0) {
-        Executor *creator = static_cast<Executor*>(sender());
-        if (creator) {
-            resultFile = creator->outputFile();
-            creator->deleteLater();
-        }
+        resultFile = _executor->outputFile();
 
         // cleanup: remove the scanned pages
         _model.clear();
@@ -398,6 +396,9 @@ void Dialog::pdfCreatorFinished(int success)
     } else {
         updateInfoText(ProcessStatus::PDFCreatedFailed);
     }
+    delete _executor;
+    _executor = nullptr;
+
     endLengthyOperation();
 }
 
@@ -502,6 +503,7 @@ void Dialog::slotFromScanner()
         updateInfoText(ProcessStatus::NotConfigured);
         return;
     }
+    Q_ASSERT(_executor == nullptr);
     _executor = new Executor;
 
     QTemporaryDir dir;
@@ -524,6 +526,7 @@ void Dialog::slotScanFinished(int exitCode)
 {
     // get the result file name from the creator object.
     QString resultFile;
+
     if (_executor) {
         resultFile = _executor->outputFile();
         delete _executor;

@@ -122,6 +122,10 @@ private:
     QString _lastPath;
     Settings *_settings;
     QScopedPointer<ImageListDelegate> _delegate;
+
+    // on longer running actions, use this global var to store the exectuor,
+    // just to be able to stop the action if the dialog is closed while running
+    // the action.
     Executor *_executor {nullptr};
 };
 #endif // DIALOG_H

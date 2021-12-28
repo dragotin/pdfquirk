@@ -30,10 +30,10 @@ class Executor : public QObject
 {
     Q_OBJECT
 public:
-    explicit Executor(QObject *parent = nullptr);
+    explicit Executor(Settings& settings, QObject *parent = nullptr);
     ~Executor();
 
-    void buildPdf(const QStringList& files, const Settings &settings);
+    void buildPdf(const QStringList& files);
     bool scan(const QString &cmd);
 
     void setOutputFile(const QString& fileName);
@@ -59,6 +59,7 @@ private slots:
 
 private:
     const QString OutfileTag {"%OUTFILE"};
+    Settings& _settings;
     QString _outputFile;
     QProcess *_process {nullptr};
 };

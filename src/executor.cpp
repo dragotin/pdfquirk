@@ -77,9 +77,9 @@ QStringList parseStringArgs(const QString& cmd)
 }
 
 
-Executor::Executor(QObject *parent)
+Executor::Executor(Settings& settings, QObject *parent)
     : QObject(parent),
-      _outputFile {"/tmp/foo.pdf"}
+      _settings {settings}
 {
 
 }
@@ -110,23 +110,76 @@ void Executor::stop()
         _process->terminate();
 }
 
-void Executor::buildPdf(const QStringList& files, const Settings& settings)
-{
-    // bind ot img2pdf for now
-    QString toolToUse {"img2pdf"};
+#define D(X) qRound(150*X)
 
-    const QString size = settings.value(settings.SettingsPaperSize, settings.SettingsPaperSizeDefault).toString();
-    const QString orientation = settings.value(settings.SettingsPaperOrient, settings.SettingsPaperOrientationDefault).toString();
-    const QString margin = settings.value(settings.SettingsPageMargin, settings.SettingsPageMarginDefault).toString();
+void Executor::buildPdf(const QStringList& files)
+{
+    const QMap<QString, int> ShortSides {{"A1", D(23.4)}, {"A2", D(16.5)}, {"A3", D(11.7)}, {"A4", D(8.3) }, {"A5", D(5.8)}, {"A6", D(4.1)}, {"Legal", D(8.5) }, {"Letter", D(8.5) }, {"Tabloid", D(11.0)}, };
+    const QMap<QString, int> LongSides { {"A1", D(33.1)}, {"A2", D(23.4)}, {"A3", D(16.5)}, {"A4", D(11.7)}, {"A5", D(8.3)}, {"A6", D(5.8)}, {"Legal", D(14.0)}, {"Letter", D(11.0)}, {"Tabloid", D(17.0)}, };
+
+    // bind ot img2pdf for now
+    const QString toolToUse {"convert"};
+    QString toolFile;
+
+    const QString size = _settings.value(_settings.SettingsPaperSize, _settings.SettingsPaperSizeDefault).toString();
+    const QString orientation = _settings.value(_settings.SettingsPaperOrient, _settings.SettingsPaperOrientationDefault).toString();
+    const QString margin = _settings.value(_settings.SettingsPageMargin, _settings.SettingsPageMarginDefault).toString();
 
     if (!files.isEmpty() && !_outputFile.isEmpty()) {
 
+        const QString sizeIndx = size.split(" ").at(0);
         QStringList args;
         if (toolToUse == "convert") {
-            const QString argstr {"-resize 1240x1753 -gravity center -units PixelsPerInch -density 150x150 -background white -extent 1240x1753"};
+
+            // all is calculated for a density of 150 pixel per inch
+            // set the page size
+            int pShort = ShortSides[sizeIndx];
+            int pLong  = LongSides[sizeIndx];
+
+            if (orientation == "Landscape") {
+                int i = pLong;
+                pLong = pShort;
+                pShort = i;
+            }
+            args.append("-page");
+            args.append(QString("%1x%2").arg(pShort).arg(pLong));
+
             args.append(files);
-            args.append(parseStringArgs(argstr));
+
+            // substract the border size for resizing.
+            QString m = margin.split(" ").at(0);
+            bool ok;
+            int marginInMM = m.toInt(&ok);
+
+            int marginPx = 0;
+            if (ok) {
+                // 1 inch = 150px = 25.4mm => 1mm = 150/25.4 px
+                marginPx = 2 * qRound(marginInMM * 150 / 25.4);
+            }
+            int imgShort = pShort - marginPx;
+            int imgLong  = pLong - marginPx;
+            const QString resizeStr = QString("%1x%2>").arg(imgShort).arg(imgLong);
+            args.append("-resize");
+            args.append(resizeStr);
+
+            args.append("-gravity");
+            args.append("Center");
+
+            args.append("-extent");
+            args.append(resizeStr);
+
+            args.append("-units");
+            args.append("PixelsPerInch");
+
+            args.append("-density");
+            args.append("150x150");
+
+            args.append("-background");
+            args.append("white");
+
             args.append(_outputFile);
+            const QString dbg = args.join(" ");
+            toolFile = _settings.convertBin();
         } else if (toolToUse == "img2pdf") {
             args.append("--output");
             args.append(_outputFile);
@@ -143,6 +196,7 @@ void Executor::buildPdf(const QStringList& files, const Settings& settings)
             m.append("mm");
             args.append(m);
             args.append(files);
+            toolFile = _settings.img2pdfBin();
         }
 
         _process = new QProcess;
@@ -150,7 +204,7 @@ void Executor::buildPdf(const QStringList& files, const Settings& settings)
                 this, &Executor::slotFinished);
         connect(_process, &QProcess::errorOccurred, this, &Executor::slotErrorOccurred);
 
-        _process->start(toolToUse, args);
+        _process->start(toolFile, args);
     } else {
         slotFinished(-3, QProcess::ExitStatus::NormalExit);
     }
@@ -250,6 +304,10 @@ bool Executor::deskewImage(PdfQuirkImage& img)
     if (!img.isValid())
         return false;
 
+    const QString deskewApp = _settings.deskewBin();
+    if (deskewApp.isEmpty())
+        return false;
+
     const QString tmpFile = img.createTempCopy();
     bool re {false};
     // rotate the image from the new, hidden file to the original file
@@ -260,7 +318,7 @@ bool Executor::deskewImage(PdfQuirkImage& img)
         args << "-b";
         args << "FFFFFF"; // create a white background
         args << tmpFile;
-        if (QProcess::execute("deskew", args) == 0) {
+        if (QProcess::execute(deskewApp, args) == 0) {
             re = true;
             QFile::remove(tmpFile);
         }

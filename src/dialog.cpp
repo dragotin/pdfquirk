@@ -126,6 +126,7 @@ Dialog::Dialog(QWidget *parent)
     // ui->listviewThumbs->setFixedHeight(thumbHeight+6);
 
     _delegate->slotThumbSize(QSize(thumbWidth, thumbHeight));
+    _delegate->setDeskewEnabled(!_settings->deskewBin().isEmpty());
 
     // size catcher
     SizeCatcher *sizeCatcher = new SizeCatcher(this);
@@ -308,7 +309,7 @@ void Dialog::execOpOnSelected(ImageOperation op)
 
     if (image.isValid()) {
         bool result {false};
-        Executor executor;
+        Executor executor(*_settings);
         if (op == ImageOperation::FlipImage) {
             qDebug() << "Flipping image" << image.fileName();
             result = executor.flipImage(image);
@@ -370,12 +371,12 @@ void Dialog::startPdfCreation()
     if (!saveFile.isEmpty()) {
         Q_ASSERT(_executor == nullptr);
 
-        _executor = new Executor;
+        _executor = new Executor(*_settings);
         connect(_executor, &Executor::finished, this, &Dialog::pdfCreatorFinished);
         _executor->setOutputFile(saveFile);
         startLengthyOperation();
         updateInfoText(ProcessStatus::CreatingPdf);
-        _executor->buildPdf(files, *_settings );
+        _executor->buildPdf(files);
     }
 }
 
@@ -504,7 +505,7 @@ void Dialog::slotFromScanner()
         return;
     }
     Q_ASSERT(_executor == nullptr);
-    _executor = new Executor;
+    _executor = new Executor(*_settings);
 
     QTemporaryDir dir;
     dir.setAutoRemove(false);

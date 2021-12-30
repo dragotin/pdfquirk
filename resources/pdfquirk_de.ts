@@ -95,94 +95,94 @@
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="177"/>
+        <location filename="../src/dialog.cpp" line="176"/>
         <source>Configuration...</source>
         <translation>Konfiguration...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="178"/>
+        <location filename="../src/dialog.cpp" line="177"/>
         <source>About PDF Quirk...</source>
         <translation>Über PDFQuirk...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="321"/>
+        <location filename="../src/dialog.cpp" line="320"/>
         <source>Do you want to remove the selected image
 </source>
         <translation>Möchten Sie die ausgewählten Bilder entfernen?
 </translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="322"/>
+        <location filename="../src/dialog.cpp" line="321"/>
         <source>Remove Image</source>
         <translation>Bild entfernen</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="371"/>
+        <location filename="../src/dialog.cpp" line="370"/>
         <source>Save PDF File</source>
         <translation>PDF Datei speichern</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="404"/>
+        <location filename="../src/dialog.cpp" line="403"/>
         <source>Add files to PDF</source>
         <translation>Dateien zu PDF hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="439"/>
+        <location filename="../src/dialog.cpp" line="438"/>
         <source>No images loaded. Load from scanner or file using the buttons above.</source>
         <translation>Keine Bilder geladen. Scannen Sie Bilder oder laden Sie Bilder über die Schaltflächen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="442"/>
+        <location filename="../src/dialog.cpp" line="441"/>
         <source>%1 image(s) scanned. Press Save to create the PDF.</source>
         <translation>%1 Bilder gescannt. Drücken Sie Speichern um ein PDF zu erzeugen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="445"/>
+        <location filename="../src/dialog.cpp" line="444"/>
         <source>%1 image(s) loaded. Press Save to create the PDF.</source>
         <translation>%1 Bilder geladen. Drücken Sie Speichern um ein PDF zu erzeugen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="448"/>
+        <location filename="../src/dialog.cpp" line="447"/>
         <source>PDF file was saved to &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt;</source>
         <translation>Die PDF Datei wurde in &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt; gespeichert</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="452"/>
+        <location filename="../src/dialog.cpp" line="451"/>
         <source>The scan command hasn&apos;t succeeded, check the configuration.</source>
         <translation>Das Scan-Kommando ist fehlgeschlagen. Bitte Konfiguration überprüfen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="455"/>
+        <location filename="../src/dialog.cpp" line="454"/>
         <source>Scanning...</source>
         <translation>Scannen...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="458"/>
+        <location filename="../src/dialog.cpp" line="457"/>
         <source>Creating the PDF...</source>
         <translation>PDF erzeugen...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="461"/>
+        <location filename="../src/dialog.cpp" line="460"/>
         <source>Handle config parameters and click the Save button.</source>
         <translation>Konfiguration bearbeiten und mit Speichern sichern. </translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="464"/>
+        <location filename="../src/dialog.cpp" line="463"/>
         <source>The scan command is not configured. Check Config first!</source>
         <translation>Das Scan-Kommando ist nicht konfiguriert. Überprüfen Sie zuerst die Konfiguration!</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="467"/>
+        <location filename="../src/dialog.cpp" line="466"/>
         <source>Click the Close button to continue.</source>
         <translation>Drücken Sie den Schließen Knopf um fortzufahren.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="470"/>
+        <location filename="../src/dialog.cpp" line="469"/>
         <source>The PDF could not be created.</source>
         <translation>Die PDF Datei konnte nicht erzeugt werden.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="473"/>
+        <location filename="../src/dialog.cpp" line="472"/>
         <source>The external tool can not be started. Check installation.</source>
         <translation>Ein externes Tool kann nicht gestartet werden. Installation prüfen.</translation>
     </message>

@@ -203,20 +203,28 @@ bool Executor::deskewImage(PdfQuirkImage& img)
     if (!img.isValid())
         return false;
 
-    const QString deskewApp = _settings.deskewBin();
-    if (deskewApp.isEmpty())
-        return false;
-
     const QString tmpFile = img.createTempCopy();
     bool re {false};
+
     // rotate the image from the new, hidden file to the original file
     if (!tmpFile.isEmpty()) {
         QStringList args;
-        args << "-o";
-        args << img.fileName();
-        args << "-b";
-        args << "FFFFFF"; // create a white background
-        args << tmpFile;
+        QString deskewApp = _settings.deskewBin();
+        if (deskewApp.isEmpty()) {
+            // use convert deskew function
+            deskewApp = _settings.convertBin();
+            args << tmpFile;
+            args << QLatin1String("-deskew");
+            args << QLatin1String("80%");
+            args << img.fileName();
+        } else {
+            // use deskew
+            args << "-o";
+            args << img.fileName();
+            args << "-b";
+            args << "FFFFFF"; // create a white background
+            args << tmpFile;
+        }
         if (QProcess::execute(deskewApp, args) == 0) {
             re = true;
             QFile::remove(tmpFile);

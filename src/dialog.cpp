@@ -127,7 +127,6 @@ Dialog::Dialog(QWidget *parent)
     // ui->listviewThumbs->setFixedHeight(thumbHeight+6);
 
     _delegate->slotThumbSize(QSize(thumbWidth, thumbHeight));
-    _delegate->setDeskewEnabled(!_settings->deskewBin().isEmpty());
 
     // size catcher
     SizeCatcher *sizeCatcher = new SizeCatcher(this);

@@ -4,14 +4,10 @@
 
 ![pdfquirk screenshot](/resources/screenshot1.png?raw=true&s=200 "Screenshot")
 
-pdfquirk is a little utility to create PDFs out of images on the 
-harddisk or from the scanner.
+PDF Quirk is a little utility to create PDFs from image files on the harddisk or from the scanner.
 
-It uses the reliable and widely available tools convert from Imagemagick 
-and scanimage from the SANE project, the standard scan solution under
-Linux.
+It utilizes the reliable and widely available tools `convert` from Imagemagick and `scanimage` from the SANE project, the standard scan solution on Linux.
 
-pdfquirk is still at a very early stage, but already useful. 
-Contributions are very welcome.
+PDF Quirk is free software. Contributions are very welcome.
 
-
+Learn more about at the [PDF Quirk Website](https://dragotin.github.io/quirksite/).

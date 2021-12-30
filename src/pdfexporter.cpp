@@ -91,7 +91,6 @@ void PDFExporter::buildPdf(const QStringList& files)
 
     int h = windowH - (2*marginOffset);
     int w = windowW - (2*marginOffset);
-    p.initFrom(pdfWriter.data());
     // For some reason, this setPen call is important to scale the image
     // correctly.
     p.setPen(QPen(Qt::blue, 2.0, Qt::SolidLine, Qt::RoundCap));

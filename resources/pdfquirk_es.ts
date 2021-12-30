@@ -95,94 +95,94 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="175"/>
+        <location filename="../src/dialog.cpp" line="177"/>
         <source>Configuration...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="176"/>
+        <location filename="../src/dialog.cpp" line="178"/>
         <source>About PDF Quirk...</source>
         <translation>Sobre PDF Quirk...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="319"/>
+        <location filename="../src/dialog.cpp" line="321"/>
         <source>Do you want to remove the selected image
 </source>
         <translation>¿Quiere alejar los imágenes seleccionados?
 </translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="320"/>
+        <location filename="../src/dialog.cpp" line="322"/>
         <source>Remove Image</source>
         <translation>Alejar Imagen</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="369"/>
+        <location filename="../src/dialog.cpp" line="371"/>
         <source>Save PDF File</source>
         <translation>Archivar PDF archivo</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="408"/>
+        <location filename="../src/dialog.cpp" line="404"/>
         <source>Add files to PDF</source>
         <translation>añadir archivos a PDF</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="443"/>
+        <location filename="../src/dialog.cpp" line="439"/>
         <source>No images loaded. Load from scanner or file using the buttons above.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="446"/>
+        <location filename="../src/dialog.cpp" line="442"/>
         <source>%1 image(s) scanned. Press Save to create the PDF.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="449"/>
+        <location filename="../src/dialog.cpp" line="445"/>
         <source>%1 image(s) loaded. Press Save to create the PDF.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="452"/>
+        <location filename="../src/dialog.cpp" line="448"/>
         <source>PDF file was saved to &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt;</source>
         <translation>PDF archivado en &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="456"/>
+        <location filename="../src/dialog.cpp" line="452"/>
         <source>The scan command hasn&apos;t succeeded, check the configuration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="459"/>
+        <location filename="../src/dialog.cpp" line="455"/>
         <source>Scanning...</source>
         <translation>escaneando...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="462"/>
+        <location filename="../src/dialog.cpp" line="458"/>
         <source>Creating the PDF...</source>
         <translation>generando PDF...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="465"/>
+        <location filename="../src/dialog.cpp" line="461"/>
         <source>Handle config parameters and click the Save button.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="468"/>
+        <location filename="../src/dialog.cpp" line="464"/>
         <source>The scan command is not configured. Check Config first!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="471"/>
+        <location filename="../src/dialog.cpp" line="467"/>
         <source>Click the Close button to continue.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="474"/>
+        <location filename="../src/dialog.cpp" line="470"/>
         <source>The PDF could not be created.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="477"/>
+        <location filename="../src/dialog.cpp" line="473"/>
         <source>The external tool can not be started. Check installation.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -190,42 +190,37 @@
 <context>
     <name>ImageListDelegate</name>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="33"/>
+        <location filename="../src/imagelistdelegate.cpp" line="32"/>
         <source>Image Actions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="35"/>
+        <location filename="../src/imagelistdelegate.cpp" line="34"/>
         <source>Flip image vertically</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="38"/>
+        <location filename="../src/imagelistdelegate.cpp" line="37"/>
         <source>Remove Image</source>
         <translation>Alejar Imagen</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="40"/>
+        <location filename="../src/imagelistdelegate.cpp" line="39"/>
         <source>Rotate image left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="43"/>
+        <location filename="../src/imagelistdelegate.cpp" line="42"/>
         <source>Rotate image right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="46"/>
+        <location filename="../src/imagelistdelegate.cpp" line="45"/>
         <source>Deskew image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="53"/>
-        <source>The command line tool deskew is not installed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/imagelistdelegate.cpp" line="56"/>
+        <location filename="../src/imagelistdelegate.cpp" line="49"/>
         <source>ImageActions</source>
         <translation type="unfinished"></translation>
     </message>
@@ -241,7 +236,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/dialog.cpp" line="53"/>
+        <location filename="../src/dialog.cpp" line="54"/>
         <source>&lt;h2&gt;About PDF Quirk version %1&lt;/h2&gt;&lt;p&gt;PDF Quirk is a simple app to easily create PDFs from scans or images.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;It is free software released under the &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.de.html&quot;&gt;Gnu General Public License version 3&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Copyright %2 Klaas Freitag &amp;lt;kraft@freisturz.de&amp;gt;&lt;/p&gt;&lt;p&gt;Website and help: &lt;a href=&quot;https://dragotin.github.io/quirksite/&quot;&gt;https://dragotin.github.io/quirksite/&lt;/a&gt;.&lt;/p&gt;Contributions are welcome, find the &lt;a href=&quot;https://github.com/dragotin/pdfquirk&quot;&gt;sources here&lt;/a&gt; or &lt;a href=&quot;https://github.com/dragotin/pdfquirk/issues&quot;&gt;report bugs&lt;/a&gt;.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>

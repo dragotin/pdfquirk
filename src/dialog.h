@@ -88,7 +88,7 @@ private slots:
     void slotFromFile();
     void slotFromScanner();
     void slotButtonClicked(QAbstractButton *button);
-    void pdfCreatorFinished(int success);
+    void pdfCreatorFinished(int success, const QString &saveFile);
     void slotScanFinished(int exitCode);
     void slotListViewSize(QSize s);
 

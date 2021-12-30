@@ -44,7 +44,7 @@ env DESTDIR=AppDir ninja install
 # get linuxdeploy and its qt plugin
 wget https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
 wget https://github.com/TheAssassin/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-"$ARCH".AppImage
-chmod +x linuxdeploy*.{AppImage,sh}
+chmod +x linuxdeploy*.AppImage
 
 # if deskew is installed, we deploy it using linuxdeploy's -e
 if deskew_path="$(which deskew 2>/dev/null)"; then
@@ -52,7 +52,12 @@ if deskew_path="$(which deskew 2>/dev/null)"; then
 else
     echo "Warning: deskew not found in \$PATH, cannot include"
 fi
-
+# if convert is installed, we deploy it using linuxdeploy's -e
+if convert_path="$(which convert 2>/dev/null)"; then
+    extra_ld_args2=(-e "$convert_path")
+else
+    echo "Warning: convert not found in \$PATH, cannot include"
+fi
 # using git to get a usable version number
 pushd "$REPO_ROOT"
 git fetch -a
@@ -63,6 +68,6 @@ popd
 # build AppImage
 export UPD_INFO="gh-releases-zsync|dragotin|pdfquirk|continuous|PDFQuirk\*-$ARCH.AppImage.zsync"
 
-./linuxdeploy-"$ARCH".AppImage --appdir AppDir --plugin qt --output appimage "${extra_ld_args[@]}"
+./linuxdeploy-"$ARCH".AppImage --appdir AppDir --plugin qt --output appimage "${extra_ld_args[@]}" "${extra_ld_args2[@]}"
 
 mv PDFQuirk*.AppImage* "$OLD_CWD"/

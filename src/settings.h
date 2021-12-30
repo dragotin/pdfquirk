@@ -39,7 +39,10 @@ public:
     const QString SettingsPaperOrientationDefault {"Portrait"};
     const QString SettingsPageMarginDefault {"5 Millimeter"};
 
-
+    // return the path of the deskew binary. Empty if not installed.
+    QString deskewBin() const;
+    QString img2pdfBin() const;
+    QString convertBin() const;
 };
 
 #endif // SETTINGS_H

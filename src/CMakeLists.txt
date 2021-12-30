@@ -6,6 +6,7 @@ set(SOURCES
     imagelistdelegate.cpp
     pdfquirkimage.cpp
     settings.cpp
+    pdfexporter.cpp
     settings.h
     imagelistdelegate.h
     executor.cpp

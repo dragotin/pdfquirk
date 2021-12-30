@@ -24,7 +24,6 @@
 #include <QEvent>
 #include <QResizeEvent>
 #include <QMenu>
-#include <QStandardPaths>
 
 
 ImageListDelegate::ImageListDelegate(QObject *parent)
@@ -47,12 +46,6 @@ ImageListDelegate::ImageListDelegate(QObject *parent)
     // _flipAct->setShortcuts(QKeySequence::F);
     connect(_deskewAct, &QAction::triggered, this, &ImageListDelegate::DeskewImage);
 
-    // check if deskew is installed.
-    if (QStandardPaths::findExecutable("deskew").isEmpty()) {
-        _deskewAct->setEnabled(false);
-        _deskewAct->setToolTip(tr("The command line tool deskew is not installed."));
-    }
-
     _menu->addSection(tr("ImageActions"));
     _menu->addAction(_flipAct);
     _menu->addAction(_rotateLeftAct);
@@ -64,6 +57,11 @@ ImageListDelegate::ImageListDelegate(QObject *parent)
 void ImageListDelegate::initStyleOption(QStyleOptionViewItem *o, const QModelIndex &idx) const
 {
     QStyledItemDelegate::initStyleOption(o, idx);
+}
+
+void ImageListDelegate::setDeskewEnabled(bool enabled)
+{
+    _deskewAct->setEnabled(enabled);
 }
 
 void ImageListDelegate::showContextMenu(const QPoint& globalPos) {

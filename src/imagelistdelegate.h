@@ -33,6 +33,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &  option ,
                    const QModelIndex &  index ) const override;
 
+    void setDeskewEnabled(bool enabled);
 signals:
     void flipImage();
     void deleteImage();

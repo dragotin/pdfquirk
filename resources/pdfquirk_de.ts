@@ -95,94 +95,94 @@
         <translation>...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="175"/>
+        <location filename="../src/dialog.cpp" line="177"/>
         <source>Configuration...</source>
         <translation>Konfiguration...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="176"/>
+        <location filename="../src/dialog.cpp" line="178"/>
         <source>About PDF Quirk...</source>
         <translation>Über PDFQuirk...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="319"/>
+        <location filename="../src/dialog.cpp" line="321"/>
         <source>Do you want to remove the selected image
 </source>
         <translation>Möchten Sie die ausgewählten Bilder entfernen?
 </translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="320"/>
+        <location filename="../src/dialog.cpp" line="322"/>
         <source>Remove Image</source>
         <translation>Bild entfernen</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="369"/>
+        <location filename="../src/dialog.cpp" line="371"/>
         <source>Save PDF File</source>
         <translation>PDF Datei speichern</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="408"/>
+        <location filename="../src/dialog.cpp" line="404"/>
         <source>Add files to PDF</source>
         <translation>Dateien zu PDF hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="443"/>
+        <location filename="../src/dialog.cpp" line="439"/>
         <source>No images loaded. Load from scanner or file using the buttons above.</source>
         <translation>Keine Bilder geladen. Scannen Sie Bilder oder laden Sie Bilder über die Schaltflächen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="446"/>
+        <location filename="../src/dialog.cpp" line="442"/>
         <source>%1 image(s) scanned. Press Save to create the PDF.</source>
         <translation>%1 Bilder gescannt. Drücken Sie Speichern um ein PDF zu erzeugen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="449"/>
+        <location filename="../src/dialog.cpp" line="445"/>
         <source>%1 image(s) loaded. Press Save to create the PDF.</source>
         <translation>%1 Bilder geladen. Drücken Sie Speichern um ein PDF zu erzeugen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="452"/>
+        <location filename="../src/dialog.cpp" line="448"/>
         <source>PDF file was saved to &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt;</source>
         <translation>Die PDF Datei wurde in &lt;a href=&quot;file:%1&quot;&gt;%1&lt;/a&gt; gespeichert</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="456"/>
+        <location filename="../src/dialog.cpp" line="452"/>
         <source>The scan command hasn&apos;t succeeded, check the configuration.</source>
         <translation>Das Scan-Kommando ist fehlgeschlagen. Bitte Konfiguration überprüfen.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="459"/>
+        <location filename="../src/dialog.cpp" line="455"/>
         <source>Scanning...</source>
         <translation>Scannen...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="462"/>
+        <location filename="../src/dialog.cpp" line="458"/>
         <source>Creating the PDF...</source>
         <translation>PDF erzeugen...</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="465"/>
+        <location filename="../src/dialog.cpp" line="461"/>
         <source>Handle config parameters and click the Save button.</source>
         <translation>Konfiguration bearbeiten und mit Speichern sichern. </translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="468"/>
+        <location filename="../src/dialog.cpp" line="464"/>
         <source>The scan command is not configured. Check Config first!</source>
         <translation>Das Scan-Kommando ist nicht konfiguriert. Überprüfen Sie zuerst die Konfiguration!</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="471"/>
+        <location filename="../src/dialog.cpp" line="467"/>
         <source>Click the Close button to continue.</source>
         <translation>Drücken Sie den Schließen Knopf um fortzufahren.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="474"/>
+        <location filename="../src/dialog.cpp" line="470"/>
         <source>The PDF could not be created.</source>
         <translation>Die PDF Datei konnte nicht erzeugt werden.</translation>
     </message>
     <message>
-        <location filename="../src/dialog.cpp" line="477"/>
+        <location filename="../src/dialog.cpp" line="473"/>
         <source>The external tool can not be started. Check installation.</source>
         <translation>Ein externes Tool kann nicht gestartet werden. Installation prüfen.</translation>
     </message>
@@ -190,42 +190,41 @@
 <context>
     <name>ImageListDelegate</name>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="33"/>
+        <location filename="../src/imagelistdelegate.cpp" line="32"/>
         <source>Image Actions</source>
         <translation>Aktionen</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="35"/>
+        <location filename="../src/imagelistdelegate.cpp" line="34"/>
         <source>Flip image vertically</source>
         <translation>Bild vertikal spiegeln</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="38"/>
+        <location filename="../src/imagelistdelegate.cpp" line="37"/>
         <source>Remove Image</source>
         <translation>Bild entfernen</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="40"/>
+        <location filename="../src/imagelistdelegate.cpp" line="39"/>
         <source>Rotate image left</source>
         <translation>Linksherum drehen</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="43"/>
+        <location filename="../src/imagelistdelegate.cpp" line="42"/>
         <source>Rotate image right</source>
         <translation>Rechtsherum drehen</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="46"/>
+        <location filename="../src/imagelistdelegate.cpp" line="45"/>
         <source>Deskew image</source>
         <translation>Bild geraderücken</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="53"/>
         <source>The command line tool deskew is not installed.</source>
-        <translation>Das Kommandozeilenwerkzeug deskew ist nicht installiert.</translation>
+        <translation type="vanished">Das Kommandozeilenwerkzeug deskew ist nicht installiert.</translation>
     </message>
     <message>
-        <location filename="../src/imagelistdelegate.cpp" line="56"/>
+        <location filename="../src/imagelistdelegate.cpp" line="49"/>
         <source>ImageActions</source>
         <translation>Bild Aktionen</translation>
     </message>
@@ -241,7 +240,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/dialog.cpp" line="53"/>
+        <location filename="../src/dialog.cpp" line="54"/>
         <source>&lt;h2&gt;About PDF Quirk version %1&lt;/h2&gt;&lt;p&gt;PDF Quirk is a simple app to easily create PDFs from scans or images.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;It is free software released under the &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.de.html&quot;&gt;Gnu General Public License version 3&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Copyright %2 Klaas Freitag &amp;lt;kraft@freisturz.de&amp;gt;&lt;/p&gt;&lt;p&gt;Website and help: &lt;a href=&quot;https://dragotin.github.io/quirksite/&quot;&gt;https://dragotin.github.io/quirksite/&lt;/a&gt;.&lt;/p&gt;Contributions are welcome, find the &lt;a href=&quot;https://github.com/dragotin/pdfquirk&quot;&gt;sources here&lt;/a&gt; or &lt;a href=&quot;https://github.com/dragotin/pdfquirk/issues&quot;&gt;report bugs&lt;/a&gt;.&lt;/p&gt;</source>
         <translation>&lt;h2&gt;Über PDF Quirk Version %1&lt;/h2&gt;&lt;p&gt;PDF Quirk ist ein einfaches Werkzeug zum erzeugen von PDFs direkt vom Scanner oder aus Bilddateien.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;Es ist freie Software und herausgegeben unter der &lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.de.html&quot;&gt;Gnu General Public License version 3&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Copyright %2 Klaas Freitag &amp;lt;kraft@freisturz.de&amp;gt;&lt;/p&gt;&lt;p&gt;Webseite und Hilfe: &lt;a href=&quot;https://dragotin.github.io/quirksite/&quot;&gt;https://dragotin.github.io/quirksite/&lt;/a&gt;.&lt;/p&gt;Beiträge sind willkommen. &lt;a href=&quot;https://github.com/dragotin/pdfquirk&quot;&gt;Quellen hier&lt;/a&gt; oder &lt;a href=&quot;https://github.com/dragotin/pdfquirk/issues&quot;&gt;Fehlermeldungen&lt;/a&gt;.&lt;/p&gt;</translation>
     </message>

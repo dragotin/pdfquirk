@@ -38,6 +38,7 @@
 #include "imagelistdelegate.h"
 #include "executor.h"
 #include "pdfquirkimage.h"
+#include "pdfexporter.h"
 #include "settings.h"
 #include "version.h"
 
@@ -126,6 +127,7 @@ Dialog::Dialog(QWidget *parent)
     // ui->listviewThumbs->setFixedHeight(thumbHeight+6);
 
     _delegate->slotThumbSize(QSize(thumbWidth, thumbHeight));
+    _delegate->setDeskewEnabled(!_settings->deskewBin().isEmpty());
 
     // size catcher
     SizeCatcher *sizeCatcher = new SizeCatcher(this);
@@ -308,7 +310,7 @@ void Dialog::execOpOnSelected(ImageOperation op)
 
     if (image.isValid()) {
         bool result {false};
-        Executor executor;
+        Executor executor(*_settings);
         if (op == ImageOperation::FlipImage) {
             qDebug() << "Flipping image" << image.fileName();
             result = executor.flipImage(image);
@@ -368,36 +370,29 @@ void Dialog::startPdfCreation()
 
     const QString saveFile = QFileDialog::getSaveFileName(this, tr("Save PDF File"), path, "PDF (*.pdf)");
     if (!saveFile.isEmpty()) {
-        Q_ASSERT(_executor == nullptr);
-
-        _executor = new Executor;
-        connect(_executor, &Executor::finished, this, &Dialog::pdfCreatorFinished);
-        _executor->setOutputFile(saveFile);
-        startLengthyOperation();
         updateInfoText(ProcessStatus::CreatingPdf);
-        _executor->buildPdf(files, *_settings );
+
+        startLengthyOperation();
+        PDFExporter exporter(*_settings);
+        exporter.setOutputFile(saveFile);
+        exporter.buildPdf(files);
+
+        // call this async once pdf building happens in a thread
+        pdfCreatorFinished(0, saveFile);
     }
 }
 
-void Dialog::pdfCreatorFinished(int success)
+void Dialog::pdfCreatorFinished(int success, const QString& saveFile)
 {
-    QApplication::restoreOverrideCursor();
-    Q_ASSERT(_executor);
     // get the result file name from the creator object.
-    QString resultFile;
     if (success == 0) {
-        resultFile = _executor->outputFile();
 
         // cleanup: remove the scanned pages
         _model.clear();
-        updateInfoText(ProcessStatus::PDFCreated, resultFile);
-    } else if (success == Executor::NotFoundExitCode) {
-        updateInfoText(ProcessStatus::ExtToolNotInstalled);
+        updateInfoText(ProcessStatus::PDFCreated, saveFile);
     } else {
         updateInfoText(ProcessStatus::PDFCreatedFailed);
     }
-    delete _executor;
-    _executor = nullptr;
 
     endLengthyOperation();
 }
@@ -504,7 +499,7 @@ void Dialog::slotFromScanner()
         return;
     }
     Q_ASSERT(_executor == nullptr);
-    _executor = new Executor;
+    _executor = new Executor(*_settings);
 
     QTemporaryDir dir;
     dir.setAutoRemove(false);

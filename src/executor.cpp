@@ -77,9 +77,9 @@ QStringList parseStringArgs(const QString& cmd)
 }
 
 
-Executor::Executor(QObject *parent)
+Executor::Executor(Settings& settings, QObject *parent)
     : QObject(parent),
-      _outputFile {"/tmp/foo.pdf"}
+      _settings {settings}
 {
 
 }
@@ -109,53 +109,6 @@ void Executor::stop()
     if (_process)
         _process->terminate();
 }
-
-void Executor::buildPdf(const QStringList& files, const Settings& settings)
-{
-    // bind ot img2pdf for now
-    QString toolToUse {"img2pdf"};
-
-    const QString size = settings.value(settings.SettingsPaperSize, settings.SettingsPaperSizeDefault).toString();
-    const QString orientation = settings.value(settings.SettingsPaperOrient, settings.SettingsPaperOrientationDefault).toString();
-    const QString margin = settings.value(settings.SettingsPageMargin, settings.SettingsPageMarginDefault).toString();
-
-    if (!files.isEmpty() && !_outputFile.isEmpty()) {
-
-        QStringList args;
-        if (toolToUse == "convert") {
-            const QString argstr {"-resize 1240x1753 -gravity center -units PixelsPerInch -density 150x150 -background white -extent 1240x1753"};
-            args.append(files);
-            args.append(parseStringArgs(argstr));
-            args.append(_outputFile);
-        } else if (toolToUse == "img2pdf") {
-            args.append("--output");
-            args.append(_outputFile);
-            args.append("--pagesize");
-            QString s = size.split(" ").at(0);
-            if (orientation == "Landscape")
-                s.append("^T");
-
-            args.append(s);
-            args.append("--fit");
-            args.append("into");
-            args.append("--border");
-            QString m = margin.split(" ").at(0);
-            m.append("mm");
-            args.append(m);
-            args.append(files);
-        }
-
-        _process = new QProcess;
-        connect(_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                this, &Executor::slotFinished);
-        connect(_process, &QProcess::errorOccurred, this, &Executor::slotErrorOccurred);
-
-        _process->start(toolToUse, args);
-    } else {
-        slotFinished(-3, QProcess::ExitStatus::NormalExit);
-    }
-}
-
 
 bool Executor::scan(const QString& cmd)
 {
@@ -217,7 +170,7 @@ bool Executor::flipImage(const PdfQuirkImage& img)
         args << "-flip";
         args << newName;
         args << img.fileName();
-        if (QProcess::execute("convert", args) == 0)
+        if (QProcess::execute(_settings.convertBin(), args) == 0)
             re = true;
     }
     return re;
@@ -237,7 +190,7 @@ bool Executor::rotate(const PdfQuirkImage& img, int degree)
         args << QString::number(degree);
         args << tmpFile;
         args << img.fileName();
-        if (QProcess::execute("convert", args) == 0) {
+        if (QProcess::execute(_settings.convertBin(), args) == 0) {
             re = true;
             QFile::remove(tmpFile);
         }
@@ -250,6 +203,10 @@ bool Executor::deskewImage(PdfQuirkImage& img)
     if (!img.isValid())
         return false;
 
+    const QString deskewApp = _settings.deskewBin();
+    if (deskewApp.isEmpty())
+        return false;
+
     const QString tmpFile = img.createTempCopy();
     bool re {false};
     // rotate the image from the new, hidden file to the original file
@@ -260,7 +217,7 @@ bool Executor::deskewImage(PdfQuirkImage& img)
         args << "-b";
         args << "FFFFFF"; // create a white background
         args << tmpFile;
-        if (QProcess::execute("deskew", args) == 0) {
+        if (QProcess::execute(deskewApp, args) == 0) {
             re = true;
             QFile::remove(tmpFile);
         }

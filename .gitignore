@@ -32,3 +32,13 @@ CMakeLists.txt.user
 *.exe
 *.out
 *.app
+
+# Compiled Qt translations
+resources/*.qm
+
+# Built and extracted AppImages
+*.AppImage*
+squashfs-root/
+
+# Editor backups
+*.*swp*

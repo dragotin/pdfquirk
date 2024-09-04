@@ -17,7 +17,7 @@ jobs:
         run: |
           set -x
           . /etc/os-release
-          zypper -n addrepo https://download.opensuse.org/repositories/home:kfreitag/openSUSE_Leap_"$VERSION_ID"/home:kfreitag.repo
+          zypper -n addrepo https://download.opensuse.org/repositories/home:kfreitag/"$VERSION_ID"/home:kfreitag.repo
           zypper --gpg-auto-import-keys refresh
           zypper -n install ImageMagick deskew wget libqt5-qtbase-devel Mesa-libGL-devel extra-cmake-modules git cmake gcc gcc-c++ ninja libqt5-linguist-devel
 

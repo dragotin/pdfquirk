@@ -34,7 +34,7 @@ OLD_CWD="$(readlink -f .)"
 pushd "$BUILD_DIR"
 
 # configure build for AppImage release
-cmake "$REPO_ROOT" -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake "$REPO_ROOT" -DUSE_QT6=no -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ninja -v -j"$(nproc)"
 

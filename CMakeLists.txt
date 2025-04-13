@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(pdfquirk LANGUAGES CXX)
 
-option(USE_QT6 "Enable this if you want to use Qt6, instead of Qt5" no)
+option(USE_QT6 "Enable this if you want to use Qt6, instead of Qt5" yes)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(ECM REQUIRED NO_MODULE)

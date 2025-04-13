@@ -82,7 +82,7 @@ bool ImageListDelegate::editorEvent(
     }
 
     if (mouseEvent and mouseEvent->button() == Qt::RightButton) {
-        showContextMenu(mouseEvent->globalPos());
+        showContextMenu(mouseEvent->globalPosition().toPoint());
 
         // Return true to indicate that we have handled the event.
         // Note: This means that we won't get any default behavior!

@@ -25,6 +25,7 @@ set_source_files_properties(${Translations} PROPERTIES OUTPUT_LOCATION
 ${CMAKE_SOURCE_DIR}/resources)
 
 if(Qt6_Found)
+    qt6_create_translation(QM_FILES ${SOURCES} ${Translations})
     qt6_add_translations(pdfquirk TS_FILES ${Translations})
     target_link_libraries(pdfquirk PRIVATE Qt6::Widgets)
     message ("Linking against Qt6!")

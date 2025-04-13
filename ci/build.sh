@@ -60,6 +60,7 @@ else
 fi
 # using git to get a usable version number
 pushd "$REPO_ROOT"
+git config --global --add safe.directory /__w/pdfquirk/pdfquirk
 git fetch -a
 VERSION="$(git describe --tags)"
 export VERSION
